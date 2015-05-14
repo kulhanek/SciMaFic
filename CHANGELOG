@@ -1,0 +1,15 @@
+// =============================================================================
+// SciMaFic - Library supporting Scientific Calculations
+// -----------------------------------------------------------------------------
+
+2009-01-18:
+    minor changes in build system
+
+2008-03-29:
+    introduction of fortran version of library
+
+2008-03-28:
+    minor changes introduced by CSmallString chnage
+    CMakeList.txt   some setup entry could be read from cmake cache and 
+                    therefore they can be changed by user
+
