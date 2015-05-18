@@ -11,7 +11,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.5 FATAL_ERROR)
 
 SET(LIBS_STATIC     OFF CACHE BOOL "Should the static version of scimafic library be built?")
 SET(LIBS_SHARED     ON  CACHE BOOL "Should the dynamic version of scimafic library be built?")
-SET(TRY_QT_LIB      ON  CACHE BOOL "Should the qt lib be used?")
 SET(FORTRAN_ENABLED ON  CACHE BOOL "Is Fortran90 available?")
 SET(LAPACK_ENABLED  ON  CACHE BOOL "Is fortran lapack available?")
 
