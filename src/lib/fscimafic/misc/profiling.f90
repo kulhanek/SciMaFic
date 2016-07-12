@@ -85,7 +85,10 @@ subroutine finalize_profiling
  implicit none
  ! -----------------------------------------------------------------------------
 
- ! nothing to be here
+ ! destroy allocated memory
+ if( allocated(Timers) ) then
+    deallocate(Timers)
+ end if
 
 end subroutine finalize_profiling
 
