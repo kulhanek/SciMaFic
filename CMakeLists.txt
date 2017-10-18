@@ -45,22 +45,11 @@ ENDIF(NOT DEVELOPMENT_ROOT)
 # external libraries -----------------------------------------------------------
 # ==============================================================================
 
-# blas and lapack --------------------------------
-IF(LAPACK_ENABLED)
-    IF(NOT MKL_FOUND)
-        # BLAS ======================
-        SET(BLAS_ROOT ${DEVELOPMENT_ROOT}/thirdparty/blas/netlib)
-        LINK_DIRECTORIES(${BLAS_ROOT}/lib)
-        SET(BLAS_LIB_NAME fblasd)
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${DEVELOPMENT_ROOT}/projects/cmake-modules/1.0/share/modules")
 
-        # LAPACK =====================
-        SET(LAPACK_ROOT ${DEVELOPMENT_ROOT}/thirdparty/lapack/3.1.1)
-        LINK_DIRECTORIES(${LAPACK_ROOT}/lib)
-        SET(LAPACK_LIB_NAME flapackd)
-    ELSE(NOT MKL_FOUND)
-        SET(LAPACK_LIB_NAME ${MKL_LIBS})
-    ENDIF(NOT MKL_FOUND)
-ENDIF(LAPACK_ENABLED)
+# BLAS/LAPACK =================
+# setup BLAS/LAPACK either from MKL or from fallback netlib blas and lapack
+FIND_PACKAGE(BlasLapack)
 
 # hipoly -----------------------------------------
 SET(HIPOLY_ROOT ${DEVELOPMENT_ROOT}/projects/hipoly/1.0)
@@ -118,6 +107,9 @@ IF(NOT DEFINED COMPOSITE_PROJECT)
         # Fortran options
         # get the name of fortran compiler
         get_filename_component(FCOMP_NAME ${CMAKE_Fortran_COMPILER} NAME_WE)
+        IF(MPI_ENABLED)
+            EXECUTE_PROCESS(COMMAND mpifort --showme:command OUTPUT_VARIABLE FCOMP_NAME OUTPUT_STRIP_TRAILING_WHITESPACE)
+        ENDIF(MPI_ENABLED)         
 
         # default compiler setups - gfortran
         SET(CMAKE_Fortran_FLAGS_RELEASE "-O0")
@@ -128,21 +120,6 @@ IF(NOT DEFINED COMPOSITE_PROJECT)
             SET(CMAKE_Fortran_FLAGS_RELEASE "-O2")
             SET(CMAKE_Fortran_FLAGS_DEBUG   "-g -O0 -std95 -traceback -check all -warn all")
         ENDIF(FCOMP_NAME STREQUAL ifort)
-
-        # open64
-        IF(FCOMP_NAME STREQUAL openf95)
-            SET(CMAKE_Fortran_FLAGS_RELEASE "-O3 -fno-second-underscore")
-            SET(CMAKE_Fortran_FLAGS_DEBUG "-g -O0 -fno-second-underscore")
-        ENDIF(FCOMP_NAME STREQUAL openf95)
-
-        # fix the problem with dynamic libraries and xlf compiler on SP5
-        IF(FCOMP_NAME STREQUAL xlf)
-            SET(CMAKE_Fortran_FLAGS_RELEASE "-O2 -qsuppress=1501-510:cmpmsg")
-            SET(CMAKE_Fortran_FLAGS_DEBUG   "-g")
-            IF(LIBS_SHARED)
-                MESSAGE(FATAL_ERROR "LIBS_SHARED is ON, which is not supported with xlf compiler!")
-            ENDIF(LIBS_SHARED)
-        ENDIF(FCOMP_NAME STREQUAL xlf)
 
     ENDIF(FORTRAN_ENABLED)
 
