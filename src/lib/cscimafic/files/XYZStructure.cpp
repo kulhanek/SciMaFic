@@ -130,7 +130,7 @@ bool CXYZStructure::Save(FILE* p_fout)
     // write data
     for(int i=0; i < GetNumberOfAtoms() ; i++) {
         CXYZAtom* p_atom = &Atoms[i];
-        if( fprintf(p_fout,"%3s %14.7f %14.7f %14.7f\n",p_atom->Symbol,p_atom->Position.x,p_atom->Position.y,p_atom->Position.z) <= 0 ) {
+        if( fprintf(p_fout,"%3s %16.9f %16.9f %16.9f\n",p_atom->Symbol,p_atom->Position.x,p_atom->Position.y,p_atom->Position.z) <= 0 ) {
             return(false);
         }
     }
