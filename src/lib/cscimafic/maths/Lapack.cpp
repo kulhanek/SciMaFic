@@ -33,6 +33,11 @@ extern "C" void dsyev_(char* jobz,char* uplo,int* n,double* a,int* lda,double* w
 
 extern "C" void dgetrf_(int* m,int* n,double* a,int* lda,int* ipiv,int* info);
 extern "C" void dgetrs_(char* trans,int* n,int* nrhs,double* a,int* lda,int* ipiv,double* b,int* ldb,int* info);
+extern "C" void dgelsd_(int* m,int* n,int* nrhs,double* a,int* lda, double* b,int* ldb,
+                        double* s, double* rcond, int* rank,
+                        double* work, int* lwork, int* iwork, int* info);
+extern "C" void dgels_(char* trans,int* m,int* n,int* nrhs,double* a,int* lda, double* b,int* ldb,
+                        double* work, int* lwork, int* info);
 
 //==============================================================================
 //------------------------------------------------------------------------------
@@ -62,6 +67,12 @@ int CLapack::syev(char jobz,char uplo,CFortranMatrix& a,CVector& w)
     // query workspace length
     dsyev_(&jobz,&uplo,&nrows,a.GetRawDataField(),&nrows,w.GetRawDataField(),
            twork,&nwork,&info);
+
+    if( info != 0 ){
+        CSmallString error;
+        error << "unable to determine lwork, info = " << info;
+        INVALID_ARGUMENT(error);
+    }
 
     // allocate work space
     CVector work;
@@ -114,6 +125,94 @@ int CLapack::solvle(CFortranMatrix& a,CVector& rhs)
     }
 
     delete[] indx;
+    return(info);
+}
+
+//------------------------------------------------------------------------------
+
+int CLapack::gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank)
+{
+    int m = a.GetNumberOfRows();
+    int n = a.GetNumberOfColumns();
+    int nrhs = 1;
+    int lda = m;
+    int ldb = std::max(m,n);
+
+    CVector s;
+    int     ns = std::min(m,n);
+    s.CreateVector(ns);
+
+    int info = 0;
+
+    // query work size
+    int     lwork = -1;
+    double  twork[1];
+
+    // printf("lwork = %d\n",lwork);
+
+    CSimpleVector<int>  iwork;
+    int li = 3*std::min(m,n)*std::min(m,n) + 11*std::min(m,n);
+    iwork.CreateVector(li);
+
+    dgelsd_(&m,&n,&nrhs,a.GetRawDataField(),&lda,rhs.GetRawDataField(),&ldb,s.GetRawDataField(),
+            &rcond,&rank,twork,&lwork,iwork.GetRawDataField(),&info);
+
+    if( info != 0 ){
+        CSmallString error;
+        error << "unable to determine lwork, info = " << info;
+        INVALID_ARGUMENT(error);
+    }
+
+    lwork = static_cast<int>(twork[0]) + 1;
+
+    // printf("lwork = %d\n",lwork);
+
+    CSimpleVector<double>  work;
+    work.CreateVector(lwork);
+
+    // run svd
+    dgelsd_(&m,&n,&nrhs,a.GetRawDataField(),&lda,rhs.GetRawDataField(),&ldb,s.GetRawDataField(),
+            &rcond,&rank,work.GetRawDataField(),&lwork,iwork.GetRawDataField(),&info);
+
+    return(info);
+}
+
+//------------------------------------------------------------------------------
+
+int CLapack::gels(CFortranMatrix& a,CVector& rhs)
+{
+    char trans = 'N';
+    int m = a.GetNumberOfRows();
+    int n = a.GetNumberOfColumns();
+    int nrhs = 1;
+    int lda = m;
+    int ldb = std::max(m,n);
+    int info = 0;
+
+    // query work size
+    int     lwork = -1;
+    double  twork[1];
+
+    dgels_(&trans,&m,&n,&nrhs,a.GetRawDataField(),&lda,rhs.GetRawDataField(),&ldb,
+           twork,&lwork,&info);
+
+    if( info != 0 ){
+        CSmallString error;
+        error << "unable to determine lwork, info = " << info;
+        INVALID_ARGUMENT(error);
+    }
+
+    lwork = static_cast<int>(twork[0]) + 1;
+
+    // printf("lwork = %d\n",lwork);
+
+    CSimpleVector<double>  work;
+    work.CreateVector(lwork);
+
+    // run
+    dgels_(&trans,&m,&n,&nrhs,a.GetRawDataField(),&lda,rhs.GetRawDataField(),&ldb,
+            work.GetRawDataField(),&lwork,&info);
+
     return(info);
 }
 

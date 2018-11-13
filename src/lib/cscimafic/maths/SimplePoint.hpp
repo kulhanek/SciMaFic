@@ -442,8 +442,11 @@ type Angle(const CSimplePoint<type> &l,const CSimplePoint<type> &r)
 {
     type top = l.x*r.x + l.y*r.y + l.z*r.z;
     type down = Size(l)*Size(r);
+    type rt = top / down;
+    if( rt < -1 ) rt = -1;
+    if( rt > 1 ) rt = 1;
 
-    return( acos( top / down ) );
+    return( acos( rt ) );
 }
 
 //------------------------------------------------------------------------------

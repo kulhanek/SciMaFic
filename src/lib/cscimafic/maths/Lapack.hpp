@@ -39,6 +39,12 @@ public:
 
     /// solve system of linear equation by LU
     static int solvle(CFortranMatrix& a,CVector& rhs);
+
+    /// solve least square problem
+    static int gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank);
+
+    /// solve least square problem
+    static int gels(CFortranMatrix& a,CVector& rhs);
 };
 
 //------------------------------------------------------------------------------
