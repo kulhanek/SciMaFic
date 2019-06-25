@@ -21,7 +21,7 @@
 
 #include <PrincipalAxes.hpp>
 #include <PeriodicTable.hpp>
-#include <Lapack.hpp>
+#include <SciLapack.hpp>
 
 //==============================================================================
 //------------------------------------------------------------------------------
@@ -79,7 +79,7 @@ void CPrincipalAxes::AddXYZStructure(const CXYZStructure& str)
 
 bool CPrincipalAxes::CalcPrincipalAxes(void)
 {
-    bool result = CLapack::syev('V','U',TensorOfInertia,Moments) == 0;
+    bool result = CSciLapack::syev('V','U',TensorOfInertia,Moments) == 0;
     if( result == true ){
         // make axes RHS (right hand system)
         CPoint cp = CrossDot(GetBAxis(),GetCAxis());
@@ -109,6 +109,7 @@ const CPoint CPrincipalAxes::GetAAxis(void)
     axis.x = TensorOfInertia[0][0];
     axis.y = TensorOfInertia[1][0];
     axis.z = TensorOfInertia[2][0];
+    axis.Normalize();
     return(axis);
 }
 
@@ -127,6 +128,7 @@ const CPoint CPrincipalAxes::GetBAxis(void)
     axis.x = TensorOfInertia[0][1];
     axis.y = TensorOfInertia[1][1];
     axis.z = TensorOfInertia[2][1];
+    axis.Normalize();
     return(axis);
 }
 
@@ -145,6 +147,7 @@ const CPoint CPrincipalAxes::GetCAxis(void)
     axis.x = TensorOfInertia[0][2];
     axis.y = TensorOfInertia[1][2];
     axis.z = TensorOfInertia[2][2];
+    axis.Normalize();
     return(axis);
 }
 

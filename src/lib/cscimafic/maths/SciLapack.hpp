@@ -1,5 +1,5 @@
-#ifndef LapackH
-#define LapackH
+#ifndef SciLapackH
+#define SciLapackH
 //==============================================================================
 //    Copyright 2010 Petr Kulhanek
 //
@@ -27,7 +27,7 @@
 
 //------------------------------------------------------------------------------
 
-class SCIMAFIC_PACKAGE CLapack {
+class SCIMAFIC_PACKAGE CSciLapack {
 public:
     ///  computes all eigenvalues and, optionally, eigenvectors of a real symmetric matrix A
     //  eigenvectors are stored columnwise
@@ -40,11 +40,14 @@ public:
     /// solve system of linear equation by LU
     static int solvle(CFortranMatrix& a,CVector& rhs);
 
-    /// solve least square problem
+    /// solve least square problem - SVD
     static int gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank);
 
     /// solve least square problem
     static int gels(CFortranMatrix& a,CVector& rhs);
+
+    /// inverse matrix by dgetrf and dgetri
+    static int inv1(CFortranMatrix& a);
 };
 
 //------------------------------------------------------------------------------

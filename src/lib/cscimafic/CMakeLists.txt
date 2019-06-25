@@ -34,7 +34,8 @@ IF(LAPACK_ENABLED)
     SET(CSCIMAFIC_SRC ${CSCIMAFIC_SRC}
 
     # maths --------------------------------------
-        maths/Lapack.cpp
+        maths/SciBlas.cpp
+        maths/SciLapack.cpp
 
     # physics ------------------------------------
         physics/PrincipalAxes.cpp

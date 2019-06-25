@@ -1,5 +1,5 @@
-#ifndef BlasH
-#define BlasH
+#ifndef SciBlasH
+#define SciBlasH
 //==============================================================================
 //    Copyright 2019 Petr Kulhanek
 //
@@ -27,13 +27,13 @@
 
 //------------------------------------------------------------------------------
 
-class SCIMAFIC_PACKAGE CBlas {
+class SCIMAFIC_PACKAGE CSciBlas {
 public:
     /// dot product
     static double dot(CVector& a,CVector& b);
 
     /// matrix vector multiplication
-    static void gemv(double alpha,CFortranMatrix& a,double beta,CVector& x,CVector& y);
+    static void gemv(double alpha,CFortranMatrix& a,CVector& x,double beta,CVector& y);
 };
 
 //------------------------------------------------------------------------------

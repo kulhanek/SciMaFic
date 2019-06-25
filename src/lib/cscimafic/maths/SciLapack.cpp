@@ -19,7 +19,7 @@
 //    Boston, MA  02110-1301  USA
 //==============================================================================
 
-#include <Lapack.hpp>
+#include <SciLapack.hpp>
 #include <ErrorSystem.hpp>
 
 //==============================================================================
@@ -38,12 +38,13 @@ extern "C" void dgelsd_(int* m,int* n,int* nrhs,double* a,int* lda, double* b,in
                         double* work, int* lwork, int* iwork, int* info);
 extern "C" void dgels_(char* trans,int* m,int* n,int* nrhs,double* a,int* lda, double* b,int* ldb,
                         double* work, int* lwork, int* info);
+extern "C" void dgetri_(int* m,double* a,int* lda,int* ipiv,double* work, int* lwork,int* info);
 
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-int CLapack::syev(char jobz,char uplo,CFortranMatrix& a,CVector& w,CVector& work)
+int CSciLapack::syev(char jobz,char uplo,CFortranMatrix& a,CVector& w,CVector& work)
 {
     int info = 0;
     int nrows = a.GetNumberOfRows();
@@ -57,7 +58,7 @@ int CLapack::syev(char jobz,char uplo,CFortranMatrix& a,CVector& w,CVector& work
 
 //------------------------------------------------------------------------------
 
-int CLapack::syev(char jobz,char uplo,CFortranMatrix& a,CVector& w)
+int CSciLapack::syev(char jobz,char uplo,CFortranMatrix& a,CVector& w)
 {
     int     info = 0;
     int     nrows = a.GetNumberOfRows();
@@ -88,7 +89,7 @@ int CLapack::syev(char jobz,char uplo,CFortranMatrix& a,CVector& w)
 
 //------------------------------------------------------------------------------
 
-int CLapack::solvle(CFortranMatrix& a,CVector& rhs)
+int CSciLapack::solvle(CFortranMatrix& a,CVector& rhs)
 {
     int info = 0;
     int ndimm = a.GetNumberOfRows();
@@ -130,7 +131,7 @@ int CLapack::solvle(CFortranMatrix& a,CVector& rhs)
 
 //------------------------------------------------------------------------------
 
-int CLapack::gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank)
+int CSciLapack::gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank)
 {
     int m = a.GetNumberOfRows();
     int n = a.GetNumberOfColumns();
@@ -179,7 +180,7 @@ int CLapack::gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank)
 
 //------------------------------------------------------------------------------
 
-int CLapack::gels(CFortranMatrix& a,CVector& rhs)
+int CSciLapack::gels(CFortranMatrix& a,CVector& rhs)
 {
     char trans = 'N';
     int m = a.GetNumberOfRows();
@@ -200,6 +201,7 @@ int CLapack::gels(CFortranMatrix& a,CVector& rhs)
         CSmallString error;
         error << "unable to determine lwork, info = " << info;
         INVALID_ARGUMENT(error);
+        return(info);
     }
 
     lwork = static_cast<int>(twork[0]) + 1;
@@ -212,6 +214,68 @@ int CLapack::gels(CFortranMatrix& a,CVector& rhs)
     // run
     dgels_(&trans,&m,&n,&nrhs,a.GetRawDataField(),&lda,rhs.GetRawDataField(),&ldb,
             work.GetRawDataField(),&lwork,&info);
+
+    return(info);
+}
+
+//------------------------------------------------------------------------------
+
+int CSciLapack::inv1(CFortranMatrix& a)
+{
+    int info = 0;
+    int ndimm = a.GetNumberOfRows();
+
+    if( ndimm == 0 ){
+        ES_ERROR("no rows in a");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != a.GetNumberOfColumns() ){
+        ES_ERROR("matrix A must be a square matrix");
+        return(-1);
+    }
+
+    int* indx = new int[ndimm];
+
+    dgetrf_(&ndimm,&ndimm,a.GetRawDataField(),&ndimm,indx,&info);
+    if( info != 0 ){
+        delete[] indx;
+        ES_ERROR("unable to do LU decomposition");
+        return(info);
+    }
+
+    // query work size
+    int     lwork = -1;
+    double  twork[1];
+
+    dgetri_(&ndimm,a.GetRawDataField(),&ndimm,indx,twork,&lwork,&info);
+
+    if( info != 0 ){
+        delete[] indx;
+        CSmallString error;
+        error << "unable to determine lwork, info = " << info;
+        INVALID_ARGUMENT(error);
+        return(info);
+    }
+
+    lwork = static_cast<int>(twork[0]) + 1;
+
+    // printf("lwork = %d\n",lwork);
+
+    CSimpleVector<double>  work;
+    work.CreateVector(lwork);
+
+    // run
+    dgetri_(&ndimm,a.GetRawDataField(),&ndimm,indx,work,&lwork,&info);
+
+    if( info != 0 ){
+        delete[] indx;
+        CSmallString error;
+        error << "unable to invert the matrix, info = " << info;
+        INVALID_ARGUMENT(error);
+        return(info);
+    }
+
+    delete[] indx;
 
     return(info);
 }
