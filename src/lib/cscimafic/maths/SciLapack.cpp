@@ -21,24 +21,8 @@
 
 #include <SciLapack.hpp>
 #include <ErrorSystem.hpp>
-
-//==============================================================================
-//------------------------------------------------------------------------------
-//==============================================================================
-
-// lapack entry points
-
-extern "C" void dsyev_(char* jobz,char* uplo,int* n,double* a,int* lda,double* w,
-                       double* work,int* lwork,int* info);
-
-extern "C" void dgetrf_(int* m,int* n,double* a,int* lda,int* ipiv,int* info);
-extern "C" void dgetrs_(char* trans,int* n,int* nrhs,double* a,int* lda,int* ipiv,double* b,int* ldb,int* info);
-extern "C" void dgelsd_(int* m,int* n,int* nrhs,double* a,int* lda, double* b,int* ldb,
-                        double* s, double* rcond, int* rank,
-                        double* work, int* lwork, int* iwork, int* info);
-extern "C" void dgels_(char* trans,int* m,int* n,int* nrhs,double* a,int* lda, double* b,int* ldb,
-                        double* work, int* lwork, int* info);
-extern "C" void dgetri_(int* m,double* a,int* lda,int* ipiv,double* work, int* lwork,int* info);
+#include <algorithm>
+#include <SciBlas.hpp>
 
 //==============================================================================
 //------------------------------------------------------------------------------
@@ -299,6 +283,7 @@ int CSciLapack::inv2(CFortranMatrix& a,double& det,double rcond,int& rank)
     int ndimm = a.GetNumberOfRows();
 
     det = 0.0;
+    rank = 0;
 
     if( ndimm == 0 ){
         ES_ERROR("no rows in a");
@@ -309,65 +294,96 @@ int CSciLapack::inv2(CFortranMatrix& a,double& det,double rcond,int& rank)
         return(-1);
     }
 
-//    fac = 1d-5
+    int m = a.GetNumberOfRows();
+    int n = a.GetNumberOfColumns();
+    int k = std::min(m,n);
 
-//     m = size(jac,1)
-//     n = size(jac,2)
-//     k = min(m,n)
+    CVector         sig;
+    CFortranMatrix  u;
+    CFortranMatrix  vt;
+    CFortranMatrix  sig_plus;
+    CFortranMatrix  temp_mat;
 
-//     allocate(u(m,m),vt(n,n),sig(k),sig_plus(n,m),iwork(8*k),work(1),temp_mat(n,m), &
-//              stat = alloc_stat)
-//     if( alloc_stat .ne. 0) then
-//        call ffdev_utils_exit(DEV_OUT,1,'Unable to allocate arrays I in ffdev_jacobian_inverse!')
-//     end if
+    sig.CreateVector(k);
+    u.CreateMatrix(m,m);
+    vt.CreateMatrix(n,n);
+    sig_plus.CreateMatrix(n,m);
+    temp_mat.CreateMatrix(n,m);
 
-//     u(:,:)          = 0.0d0
-//     vt(:,:)         = 0.0d0
-//     sig(:)          = 0.0d0
-//     sig_plus(:,:)   = 0.0d0
-//     work(:)         = 0.0d0
+    u.SetZero();
+    vt.SetZero();
+    sig.SetZero();
+    sig_plus.SetZero();
 
-//     ! work size query
-//     lwork = -1
-//     call dgesdd('A', m, n, jac(1,1), m, sig(1), u(1,1), m, vt(1,1), n, work(1), &
-//                 lwork, iwork(1), info)
+    int* iwork = new int[8*k];
 
-//     if( info .ne. 0) then
-//        call ffdev_utils_exit(DEV_OUT,1,'Unable to get size of working array in ffdev_jacobian_inverse!')
-//     end if
+    // query work size
+    int     lwork = -1;
+    double  twork[1];
 
-//     ! reinit working array
-//     deallocate(work)
-//     lwork = int(work(1))
-//     allocate(work(lwork), stat = alloc_stat)
+    //     lwork = -1
+    char mode = 'A';
+    dgesdd_(&mode, &m, &n, a.GetRawDataField(), &m, sig.GetRawDataField(), u.GetRawDataField(), &m,
+            vt.GetRawDataField(), &n, twork, &lwork, iwork, &info);
 
-//     if( alloc_stat .ne. 0) then
-//        call ffdev_utils_exit(DEV_OUT,1,'Unable to allocate arrays II in ffdev_jacobian_inverse!')
-//     end if
+    if( info != 0 ){
+        delete[] iwork;
+        CSmallString error;
+        error << "unable to determine lwork, info = " << info;
+        INVALID_ARGUMENT(error);
+        return(info);
+    }
 
-//     ! do SVD
-//     call dgesdd('A', m, n, jac(1,1), m, sig(1), u(1,1), m, vt(1,1), n, work(1), &
-//                 lwork, iwork(1), info)
+    lwork = static_cast<int>(twork[0]) + 1;
 
-//     if( info .ne. 0) then
-//        call ffdev_utils_exit(DEV_OUT,1,'SVD failed in ffdev_jacobian_inverse!')
-//     end if
+    // printf("lwork = %d\n",lwork);
 
-//     ! set singular values that are too small to zero
-//     do i = 1, k
-//        if( sig(i) > fac*maxval(sig) ) then
-//           sig_plus(i,i) = 1.0d0/sig(i)
-//        else
-//           sig_plus(i,i) = 0.0d0
-//        end if
-//     end do
+    CSimpleVector<double>  work;
+    work.CreateVector(lwork);
 
-//     ! build pseudoinverse: V*sig_plus*UT
-//     CALL dgemm('N', 'T', n, m, m, 1.0d0, sig_plus, n, u, m, 0.0d0, temp_mat, n)
-//     CALL dgemm('T', 'N', n, m, n, 1.0d0, vt, n, temp_mat, n, 0.0d0, ijac, n)
+    // run
+    dgesdd_(&mode, &m, &n, a.GetRawDataField(), &m, sig.GetRawDataField(), u.GetRawDataField(), &m,
+            vt.GetRawDataField(), &n, work.GetRawDataField(), &lwork, iwork, &info);
 
-//     ! clean data
-//     deallocate(u, vt, sig, iwork, work, sig_plus, temp_mat)
+    if( info != 0 ){
+        delete[] iwork;
+        CSmallString error;
+        error << "unable to calculate SVD, info = " << info;
+        INVALID_ARGUMENT(error);
+        return(info);
+    }
+
+    delete[] iwork;
+
+    // invert singular numbers
+    double maxval = sig[0];
+    for(int i=0; i < k; i++){
+        if( maxval < sig[i] ){
+            maxval = sig[i];
+        }
+    }
+
+    det = 1.0;
+    for(int i=0; i < k; i++){
+        if( sig[i] > rcond*maxval ) {
+           det *= sig[i];
+           sig_plus[i][i] = 1.0/sig[i];
+           rank++;
+        } else {
+           sig_plus[i][i] = 0.0;
+        }
+    }
+
+    double  one = 1.0;
+    double  zero = 0.0;
+    char    nmode = 'N';
+    char    tmode = 'T';
+
+    // build pseudoinverse: V*sig_plus*UT
+    dgemm_(&nmode, &tmode, &n, &m, &m, &one, sig_plus.GetRawDataField(), &n, u.GetRawDataField(), &m, &zero,
+           temp_mat.GetRawDataField(), &n);
+    dgemm_(&tmode, &nmode, &n, &m, &n, &one, vt.GetRawDataField(), &n, temp_mat.GetRawDataField(), &n, &zero,
+           a.GetRawDataField(), &n);
 
     return(info);
 }

@@ -26,16 +26,6 @@
 //------------------------------------------------------------------------------
 //==============================================================================
 
-// blas entry points
-
-extern "C" double ddot_(int* N,double* DX,int* INCX,double* DY,int* INCY);
-extern "C" void dgemv_(char* trans,int* M, int* N, double* ALPHA,
-                      double* A,int* LDA,double* X,int* INCX,double* BETA,double* Y,int* INCY);
-
-//==============================================================================
-//------------------------------------------------------------------------------
-//==============================================================================
-
 double CSciBlas::dot(CVector& a,CVector& b)
 {
     if( a.GetLength() != b.GetLength() ){
