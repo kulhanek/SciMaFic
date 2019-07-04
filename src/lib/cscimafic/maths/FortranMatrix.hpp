@@ -33,7 +33,8 @@ class CXMLBinData;
 class SCIMAFIC_PACKAGE CFortranMatrix {
 public:
     CFortranMatrix(void);
-    CFortranMatrix(const CFortranMatrix& copy);
+    CFortranMatrix(const CFortranMatrix& src);
+    ~CFortranMatrix(void);
 
 // setup methods ---------------------------------------------------------------
     bool CreateMatrix(unsigned int rows,unsigned int columns);
@@ -51,6 +52,7 @@ public:
 // access method ---------------------------------------------------------------
     const CFortranRow operator[](int row) const;
     CFortranRow       operator[](int row);
+    void              operator=(const CFortranMatrix& src);
 
 // I/O methods -----------------------------------------------------------------
     /// load matrix data from XMLBinData

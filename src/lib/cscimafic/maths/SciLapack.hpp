@@ -46,8 +46,13 @@ public:
     /// solve least square problem
     static int gels(CFortranMatrix& a,CVector& rhs);
 
-    /// inverse matrix by dgetrf and dgetri
-    static int inv1(CFortranMatrix& a);
+    /// inverse matrix by dgetrf and dgetri (via LU)
+    /// det is determinat of original matrix
+    static int inv1(CFortranMatrix& a,double& det);
+
+    /// inverse matrix by SVD
+    /// det is determinat of original matrix
+    static int inv2(CFortranMatrix& a,double& det,double rcond,int& rank);
 };
 
 //------------------------------------------------------------------------------

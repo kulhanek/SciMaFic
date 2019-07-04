@@ -29,7 +29,7 @@
 //------------------------------------------------------------------------------
 //==============================================================================
 
-__hipolyspec CFortranMatrix::CFortranMatrix(void)
+CFortranMatrix::CFortranMatrix(void)
 {
     NRows = 0;
     NColumns = 0;
@@ -38,10 +38,20 @@ __hipolyspec CFortranMatrix::CFortranMatrix(void)
 
 //------------------------------------------------------------------------------
 
-__hipolyspec CFortranMatrix::CFortranMatrix(const CFortranMatrix& src)
+CFortranMatrix::~CFortranMatrix(void)
+{
+    if( Array ){
+        delete[] Array;
+        Array = NULL;
+    }
+}
+
+//------------------------------------------------------------------------------
+
+CFortranMatrix::CFortranMatrix(const CFortranMatrix& src)
 {
     CreateMatrix(src.GetNumberOfRows(),src.GetNumberOfColumns());
-    if( Array != NULL ) memcpy(src.Array,Array,NRows*NColumns*sizeof(double));
+    if( Array != NULL ) memcpy(Array,src.Array,NRows*NColumns*sizeof(double));
 }
 
 //==============================================================================
@@ -96,6 +106,18 @@ bool CFortranMatrix::CreateMatrix(unsigned int nrows,unsigned int ncolumns)
 
 //------------------------------------------------------------------------------
 
+void CFortranMatrix::FreeMatrix(void)
+{
+    if( Array ){
+        delete[] Array;
+        Array = NULL;
+    }
+    NRows = 0;
+    NColumns = 0;
+}
+
+//------------------------------------------------------------------------------
+
 void CFortranMatrix::SetZero(void)
 {
     for(unsigned int i=0; i < NRows*NColumns; i++) {
@@ -138,6 +160,14 @@ const CFortranRow CFortranMatrix::operator[](int row) const
 CFortranRow CFortranMatrix::operator[](int row)
 {
     return(CFortranRow(this,row));
+}
+
+//------------------------------------------------------------------------------
+
+void CFortranMatrix::operator=(const CFortranMatrix& src)
+{
+    CreateMatrix(src.GetNumberOfRows(),src.GetNumberOfColumns());
+    if( Array != NULL ) memcpy(Array,src.Array,NRows*NColumns*sizeof(double));
 }
 
 //==============================================================================
