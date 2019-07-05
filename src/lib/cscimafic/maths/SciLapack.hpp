@@ -48,11 +48,11 @@ public:
 
     /// inverse matrix by dgetrf and dgetri (via LU)
     /// det is determinat of original matrix
-    static int inv1(CFortranMatrix& a,double& det);
+    static int inv1(CFortranMatrix& a,double& logdet);
 
     /// inverse matrix by SVD
     /// det is determinat of original matrix
-    static int inv2(CFortranMatrix& a,double& det,double rcond,int& rank);
+    static int inv2(CFortranMatrix& a,double& logdet,double rcond,int& rank);
 };
 
 //------------------------------------------------------------------------------

@@ -204,12 +204,12 @@ int CSciLapack::gels(CFortranMatrix& a,CVector& rhs)
 
 //------------------------------------------------------------------------------
 
-int CSciLapack::inv1(CFortranMatrix& a,double& det)
+int CSciLapack::inv1(CFortranMatrix& a,double& logdet)
 {
     int info = 0;
     int ndimm = a.GetNumberOfRows();
 
-    det = 0.0;
+    logdet = 0.0;
 
     if( ndimm == 0 ){
         ES_ERROR("no rows in a");
@@ -229,13 +229,9 @@ int CSciLapack::inv1(CFortranMatrix& a,double& det)
         return(info);
     }
 
-    // calculate determinat of A
-    det = 1.0;
+    // calculate log determinat of A
     for(int i=0; i < ndimm; i++){
-        det *= a[i][i];
-        if( indx[i] != i + 1 ){ // indx - fortran indexes
-            det *= -1.0;
-        }
+        logdet += log(fabs(a[i][i]));
     }
 
     // query work size
@@ -277,12 +273,12 @@ int CSciLapack::inv1(CFortranMatrix& a,double& det)
 
 //------------------------------------------------------------------------------
 
-int CSciLapack::inv2(CFortranMatrix& a,double& det,double rcond,int& rank)
+int CSciLapack::inv2(CFortranMatrix& a,double& logdet,double rcond,int& rank)
 {
     int info = 0;
     int ndimm = a.GetNumberOfRows();
 
-    det = 0.0;
+    logdet = 0.0;
     rank = 0;
 
     if( ndimm == 0 ){
@@ -363,10 +359,9 @@ int CSciLapack::inv2(CFortranMatrix& a,double& det,double rcond,int& rank)
         }
     }
 
-    det = 1.0;
     for(int i=0; i < k; i++){
         if( sig[i] > rcond*maxval ) {
-           det *= sig[i];
+           logdet += log(fabs(sig[i]));
            sig_plus[i][i] = 1.0/sig[i];
            rank++;
         } else {
