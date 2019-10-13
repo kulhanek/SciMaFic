@@ -23,6 +23,7 @@
 #include <ErrorSystem.hpp>
 #include <algorithm>
 #include <SciBlas.hpp>
+#include <bits/stdc++.h>
 
 //==============================================================================
 //------------------------------------------------------------------------------
@@ -149,6 +150,10 @@ int CSciLapack::gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank)
     }
 
     lwork = static_cast<int>(twork[0]) + 1;
+    if( lwork < 0 ){
+        // overflow - consider only INT_MAX
+        lwork = INT_MAX;
+    }
 
     // printf("lwork = %d\n",lwork);
 
@@ -189,6 +194,10 @@ int CSciLapack::gels(CFortranMatrix& a,CVector& rhs)
     }
 
     lwork = static_cast<int>(twork[0]) + 1;
+    if( lwork < 0 ){
+        // overflow - consider only INT_MAX
+        lwork = INT_MAX;
+    }
 
     // printf("lwork = %d\n",lwork);
 
@@ -249,6 +258,10 @@ int CSciLapack::inv1(CFortranMatrix& a,double& logdet)
     }
 
     lwork = static_cast<int>(twork[0]) + 1;
+    if( lwork < 0 ){
+        // overflow - consider only INT_MAX
+        lwork = INT_MAX;
+    }
 
     // printf("lwork = %d\n",lwork);
 
@@ -331,6 +344,10 @@ int CSciLapack::inv2(CFortranMatrix& a,double& logdet,double rcond,int& rank)
     }
 
     lwork = static_cast<int>(twork[0]) + 1;
+    if( lwork < 0 ){
+        // overflow - consider only INT_MAX
+        lwork = INT_MAX;
+    }
 
     // printf("lwork = %d\n",lwork);
 
