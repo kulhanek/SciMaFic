@@ -23,7 +23,9 @@
 #include <ErrorSystem.hpp>
 #include <algorithm>
 #include <SciBlas.hpp>
-#include <bits/stdc++.h>
+#include <sstream>
+
+using namespace  std;
 
 //==============================================================================
 //------------------------------------------------------------------------------
@@ -151,8 +153,9 @@ int CSciLapack::gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank)
 
     lwork = static_cast<int>(twork[0]) + 1;
     if( lwork < 0 ){
-        // overflow - consider only INT_MAX
-        lwork = INT_MAX;
+        stringstream error;
+        error << "memory request overflow, twork = " << twork[0] << " -> lwork = " << lwork;
+        RUNTIME_ERROR(error.str());
     }
 
     // printf("lwork = %d\n",lwork);
@@ -195,8 +198,9 @@ int CSciLapack::gels(CFortranMatrix& a,CVector& rhs)
 
     lwork = static_cast<int>(twork[0]) + 1;
     if( lwork < 0 ){
-        // overflow - consider only INT_MAX
-        lwork = INT_MAX;
+        stringstream error;
+        error << "memory request overflow, twork = " << twork[0] << " -> lwork = " << lwork;
+        RUNTIME_ERROR(error.str());
     }
 
     // printf("lwork = %d\n",lwork);
@@ -259,8 +263,9 @@ int CSciLapack::inv1(CFortranMatrix& a,double& logdet)
 
     lwork = static_cast<int>(twork[0]) + 1;
     if( lwork < 0 ){
-        // overflow - consider only INT_MAX
-        lwork = INT_MAX;
+        stringstream error;
+        error << "memory request overflow, twork = " << twork[0] << " -> lwork = " << lwork;
+        RUNTIME_ERROR(error.str());
     }
 
     // printf("lwork = %d\n",lwork);
@@ -324,6 +329,117 @@ int CSciLapack::inv2(CFortranMatrix& a,double& logdet,double rcond,int& rank)
     sig.SetZero();
     sig_plus.SetZero();
 
+    // query work size
+    int     lwork = -1;
+    double  twork[1];
+
+    //     lwork = -1
+    char mode = 'A';
+    dgesvd_(&mode, &mode, &m, &n, a.GetRawDataField(), &m, sig.GetRawDataField(), u.GetRawDataField(), &m,
+            vt.GetRawDataField(), &n, twork, &lwork, &info);
+
+    if( info != 0 ){
+        CSmallString error;
+        error << "unable to determine lwork, info = " << info;
+        INVALID_ARGUMENT(error);
+        return(info);
+    }
+
+    lwork = static_cast<int>(twork[0]) + 1;
+    if( lwork < 0 ){
+        stringstream error;
+        error << "memory request overflow, twork = " << twork[0] << " -> lwork = " << lwork;
+        RUNTIME_ERROR(error.str());
+    }
+
+    // printf("lwork = %d\n",lwork);
+
+    CSimpleVector<double>  work;
+    work.CreateVector(lwork);
+
+    // run
+    dgesvd_(&mode, &mode, &m, &n, a.GetRawDataField(), &m, sig.GetRawDataField(), u.GetRawDataField(), &m,
+            vt.GetRawDataField(), &n, work.GetRawDataField(), &lwork, &info);
+
+    if( info != 0 ){
+        CSmallString error;
+        error << "unable to calculate SVD, info = " << info;
+        INVALID_ARGUMENT(error);
+        return(info);
+    }
+
+    // invert singular numbers
+    double maxval = sig[0];
+    for(int i=0; i < k; i++){
+        if( maxval < sig[i] ){
+            maxval = sig[i];
+        }
+    }
+
+    for(int i=0; i < k; i++){
+        if( sig[i] > rcond*maxval ) {
+           logdet += log(fabs(sig[i]));
+           sig_plus[i][i] = 1.0/sig[i];
+           rank++;
+        } else {
+           sig_plus[i][i] = 0.0;
+        }
+    }
+
+    double  one = 1.0;
+    double  zero = 0.0;
+    char    nmode = 'N';
+    char    tmode = 'T';
+
+    // build pseudoinverse: V*sig_plus*UT
+    dgemm_(&nmode, &tmode, &n, &m, &m, &one, sig_plus.GetRawDataField(), &n, u.GetRawDataField(), &m, &zero,
+           temp_mat.GetRawDataField(), &n);
+    dgemm_(&tmode, &nmode, &n, &m, &n, &one, vt.GetRawDataField(), &n, temp_mat.GetRawDataField(), &n, &zero,
+           a.GetRawDataField(), &n);
+
+    return(info);
+}
+
+//------------------------------------------------------------------------------
+
+int CSciLapack::inv3(CFortranMatrix& a,double& logdet,double rcond,int& rank)
+{
+    int info = 0;
+    int ndimm = a.GetNumberOfRows();
+
+    logdet = 0.0;
+    rank = 0;
+
+    if( ndimm == 0 ){
+        ES_ERROR("no rows in a");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != a.GetNumberOfColumns() ){
+        ES_ERROR("matrix A must be a square matrix");
+        return(-1);
+    }
+
+    int m = a.GetNumberOfRows();
+    int n = a.GetNumberOfColumns();
+    int k = std::min(m,n);
+
+    CVector         sig;
+    CFortranMatrix  u;
+    CFortranMatrix  vt;
+    CFortranMatrix  sig_plus;
+    CFortranMatrix  temp_mat;
+
+    sig.CreateVector(k);
+    u.CreateMatrix(m,m);
+    vt.CreateMatrix(n,n);
+    sig_plus.CreateMatrix(n,m);
+    temp_mat.CreateMatrix(n,m);
+
+    u.SetZero();
+    vt.SetZero();
+    sig.SetZero();
+    sig_plus.SetZero();
+
     int* iwork = new int[8*k];
 
     // query work size
@@ -345,8 +461,9 @@ int CSciLapack::inv2(CFortranMatrix& a,double& logdet,double rcond,int& rank)
 
     lwork = static_cast<int>(twork[0]) + 1;
     if( lwork < 0 ){
-        // overflow - consider only INT_MAX
-        lwork = INT_MAX;
+        stringstream error;
+        error << "memory request overflow, twork = " << twork[0] << " -> lwork = " << lwork;
+        RUNTIME_ERROR(error.str());
     }
 
     // printf("lwork = %d\n",lwork);

@@ -47,12 +47,16 @@ public:
     static int gels(CFortranMatrix& a,CVector& rhs);
 
     /// inverse matrix by dgetrf and dgetri (via LU)
-    /// det is determinat of original matrix
+    /// logdet is logarithm of determinat of original matrix
     static int inv1(CFortranMatrix& a,double& logdet);
 
-    /// inverse matrix by SVD
-    /// det is determinat of original matrix
+    /// inverse matrix by SVD - simple driver
+    /// logdet is logarithm of determinat of original matrix
     static int inv2(CFortranMatrix& a,double& logdet,double rcond,int& rank);
+
+    /// inverse matrix by SVD - divide and qonquer
+    /// logdet is logarithm of determinat of original matrix
+    static int inv3(CFortranMatrix& a,double& logdet,double rcond,int& rank);
 };
 
 //------------------------------------------------------------------------------
@@ -71,6 +75,11 @@ extern "C" void dgels_(char* trans,int* m,int* n,int* nrhs,double* a,int* lda, d
                         double* work, int* lwork, int* info);
 extern "C" void dgetri_(int* m,double* a,int* lda,int* ipiv,double* work, int* lwork,int* info);
 
+// SVD - simple driver
+extern "C" void dgesvd_(char* jobu,char* jobvt,int* m,int* n,double* a,int* lda,double* s,double* u,int* ldu,
+                        double* vt,int* ldvt,double* work,int* lwork,int* info);
+
+// SVD - divide and conquer
 extern "C" void dgesdd_(char* jobz,int* m,int* n,double* a,int* lda,double* s,double* u,int* ldu,
                         double* vt,int* ldvt,double* work,int* lwork,int* iwork,int* info);
 
