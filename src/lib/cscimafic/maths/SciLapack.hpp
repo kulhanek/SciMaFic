@@ -48,15 +48,19 @@ public:
 
     /// inverse matrix by dgetrf and dgetri (via LU)
     /// logdet is logarithm of determinat of original matrix
-    static int inv1(CFortranMatrix& a,double& logdet);
+    static int invLU(CFortranMatrix& a,double& logdet);
+
+    /// inverse matrix by potrf and potri (via Cholesky factorization)
+    /// logdet is logarithm of determinat of original matrix
+    static int invLL(CFortranMatrix& a,double& logdet);
 
     /// inverse matrix by SVD - simple driver
     /// logdet is logarithm of determinat of original matrix
-    static int inv2(CFortranMatrix& a,double& logdet,double rcond,int& rank);
+    static int invSVD1(CFortranMatrix& a,double& logdet,double rcond,int& rank);
 
     /// inverse matrix by SVD - divide and qonquer
     /// logdet is logarithm of determinat of original matrix
-    static int inv3(CFortranMatrix& a,double& logdet,double rcond,int& rank);
+    static int invSVD2(CFortranMatrix& a,double& logdet,double rcond,int& rank);
 };
 
 //------------------------------------------------------------------------------
@@ -82,6 +86,10 @@ extern "C" void dgesvd_(char* jobu,char* jobvt,int* m,int* n,double* a,int* lda,
 // SVD - divide and conquer
 extern "C" void dgesdd_(char* jobz,int* m,int* n,double* a,int* lda,double* s,double* u,int* ldu,
                         double* vt,int* ldvt,double* work,int* lwork,int* iwork,int* info);
+
+// Cholesky factorization
+extern "C" void dpotrf_(char* uplo,int* n,double* a,int* lda,int* info);
+extern "C" void dpotri_(char* uplo,int* n,double* a,int* lda,int* info);
 
 //------------------------------------------------------------------------------
 

@@ -217,7 +217,7 @@ int CSciLapack::gels(CFortranMatrix& a,CVector& rhs)
 
 //------------------------------------------------------------------------------
 
-int CSciLapack::inv1(CFortranMatrix& a,double& logdet)
+int CSciLapack::invLU(CFortranMatrix& a,double& logdet)
 {
     int info = 0;
     int ndimm = a.GetNumberOfRows();
@@ -291,7 +291,56 @@ int CSciLapack::inv1(CFortranMatrix& a,double& logdet)
 
 //------------------------------------------------------------------------------
 
-int CSciLapack::inv2(CFortranMatrix& a,double& logdet,double rcond,int& rank)
+int CSciLapack::invLL(CFortranMatrix& a,double& logdet)
+{
+    int info = 0;
+    int ndimm = a.GetNumberOfRows();
+
+    logdet = 0.0;
+
+    if( ndimm == 0 ){
+        ES_ERROR("no rows in a");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != a.GetNumberOfColumns() ){
+        ES_ERROR("matrix A must be a square matrix");
+        return(-1);
+    }
+
+    char uplo = 'L';
+    dpotrf_(&uplo,&ndimm,a.GetRawDataField(),&ndimm,&info);
+    if( info != 0 ){
+        ES_ERROR("unable to do LL decomposition");
+        return(info);
+    }
+
+    // calculate log determinat of A
+    for(int i=0; i < ndimm; i++){
+        logdet += 2.0*log(fabs(a[i][i]));
+    }
+
+    dpotri_(&uplo,&ndimm,a.GetRawDataField(),&ndimm,&info);
+
+    if( info != 0 ){
+        CSmallString error;
+        error << "unable to invert the matrix, info = " << info;
+        INVALID_ARGUMENT(error);
+        return(info);
+    }
+
+    // reconstruct the upper part of matrix
+    for(int i=0; i < ndimm; i++){
+        for(int j=0; j < i; j++){
+            a[j][i] = a[i][j];
+        }
+    }
+
+    return(info);
+}
+
+//------------------------------------------------------------------------------
+
+int CSciLapack::invSVD1(CFortranMatrix& a,double& logdet,double rcond,int& rank)
 {
     int info = 0;
     int ndimm = a.GetNumberOfRows();
@@ -402,7 +451,7 @@ int CSciLapack::inv2(CFortranMatrix& a,double& logdet,double rcond,int& rank)
 
 //------------------------------------------------------------------------------
 
-int CSciLapack::inv3(CFortranMatrix& a,double& logdet,double rcond,int& rank)
+int CSciLapack::invSVD2(CFortranMatrix& a,double& logdet,double rcond,int& rank)
 {
     int info = 0;
     int ndimm = a.GetNumberOfRows();
