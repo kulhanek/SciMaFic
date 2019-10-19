@@ -24,9 +24,35 @@
 #include <algorithm>
 #include <SciBlas.hpp>
 #include <sstream>
+
+// MKL support
+#ifdef HAVE_MKL_PARALLEL
+#include <mkl.h>
+#else
 #include <BlasLapack.hpp>
+#endif
 
 using namespace  std;
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+void CSciLapack::PrintExecInfo(CVerboseStr& vout)
+{
+#ifdef HAVE_MKL
+#ifdef HAVE_MKL_PARALLEL
+    {
+        int ncpus = mkl_get_max_threads();
+        vout << "   Lapack/Blas via MKL: Number of threads: " << ncpus << endl;
+    }
+#else
+        vout << "   Lapack/Blas via MKL: Sequential mode." << endl;
+#endif
+#else
+    vout << "   Native Lapack/Blas: Sequential mode." << endl;
+#endif
+}
 
 //==============================================================================
 //------------------------------------------------------------------------------

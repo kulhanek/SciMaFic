@@ -24,11 +24,15 @@
 #include <SciMaFicMainHeader.hpp>
 #include <FortranMatrix.hpp>
 #include <Vector.hpp>
+#include <VerboseStr.hpp>
 
 //------------------------------------------------------------------------------
 
 class SCIMAFIC_PACKAGE CSciLapack {
 public:
+    /// print info about Blas/Lapack
+    static void PrintExecInfo(CVerboseStr& vout);
+
     ///  computes all eigenvalues and, optionally, eigenvectors of a real symmetric matrix A
     //  eigenvectors are stored columnwise
     static int syev(char jobz,char uplo,CFortranMatrix& a,CVector& w,CVector& work);
