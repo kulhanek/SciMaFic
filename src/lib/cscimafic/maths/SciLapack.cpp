@@ -27,10 +27,12 @@
 
 // MKL support
 #ifdef HAVE_MKL_PARALLEL
+// hack - disable loading mkl_lapack.h, which conflicts with BlasLapack.hpp
+#define _MKL_LAPACK_H_
 #include <mkl.h>
-#else
-#include <BlasLapack.hpp>
 #endif
+
+#include <BlasLapack.hpp>
 
 using namespace  std;
 
