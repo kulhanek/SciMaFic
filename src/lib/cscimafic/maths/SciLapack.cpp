@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <SciBlas.hpp>
 #include <sstream>
+#include <BlasLapack.hpp>
 
 using namespace  std;
 

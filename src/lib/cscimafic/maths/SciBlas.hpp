@@ -38,15 +38,4 @@ public:
 
 //------------------------------------------------------------------------------
 
-// blas entry points
-
-extern "C" double ddot_(int* N,double* DX,int* INCX,double* DY,int* INCY);
-extern "C" void dgemv_(char* trans,int* M, int* N, double* ALPHA,
-                      double* A,int* LDA,double* X,int* INCX,double* BETA,double* Y,int* INCY);
-
-extern "C" void dgemm_(char* transa, char* transb,int* M,int* N,int* K,double* alpha,
-                       double* a,int* lda,double* b,int* ldb,double* beta,double* c, int* ldc);
-
-//------------------------------------------------------------------------------
-
 #endif

@@ -17,6 +17,7 @@ src/lib/cscimafic/files/XYZStructure.cpp
 src/lib/cscimafic/files/XYZStructure.hpp
 src/lib/cscimafic/maths/Blas.cpp
 src/lib/cscimafic/maths/Blas.hpp
+src/lib/cscimafic/maths/BlasLapack.hpp
 src/lib/cscimafic/maths/DynamicArray.cpp
 src/lib/cscimafic/maths/DynamicArray.hpp
 src/lib/cscimafic/maths/FortranMatrix.cpp
