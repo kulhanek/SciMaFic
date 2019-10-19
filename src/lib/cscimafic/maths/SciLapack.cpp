@@ -46,13 +46,13 @@ void CSciLapack::PrintExecInfo(CVerboseStr& vout)
 #ifdef HAVE_MKL_PARALLEL
     {
         int ncpus = mkl_get_max_threads();
-        vout << "   Lapack/Blas via MKL: Number of threads: " << ncpus << endl;
+        vout << "   Lapack/Blas via MKL - number of threads: " << ncpus << endl;
     }
 #else
-        vout << "   Lapack/Blas via MKL: Sequential mode." << endl;
+        vout << "   Lapack/Blas via MKL - sequential mode." << endl;
 #endif
 #else
-    vout << "   Native Lapack/Blas: Sequential mode." << endl;
+    vout << "   Native Lapack/Blas - sequential mode." << endl;
 #endif
 }
 
