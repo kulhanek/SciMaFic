@@ -74,8 +74,26 @@ public:
     /// access indivudual vector elements
     OType& operator [] (const size_t index);
 
+    /// access indivudual vector elements
+    OType& operator [] (const long int index);
+
+    /// access indivudual vector elements
+    OType& operator [] (const unsigned int index);
+
+    /// access indivudual vector elements
+    OType& operator [] (const int index);
+
     /// access individual vector elements
     const OType& operator [] (const size_t index) const;
+
+    /// access individual vector elements
+    const OType& operator [] (const long int index) const;
+
+    /// access individual vector elements
+    const OType& operator [] (const unsigned int index) const;
+
+    /// access individual vector elements
+    const OType& operator [] (const int index) const;
 
     /// return pointer to vector array
     operator const OType*() const;
@@ -290,7 +308,55 @@ OType& CSimpleVector<OType>::operator [] (const size_t index)
 //------------------------------------------------------------------------------
 
 template<class OType>
+OType& CSimpleVector<OType>::operator [] (const long int index)
+{
+    return(Array[index]);
+}
+
+//------------------------------------------------------------------------------
+
+template<class OType>
+OType& CSimpleVector<OType>::operator [] (const unsigned int index)
+{
+    return(Array[index]);
+}
+
+//------------------------------------------------------------------------------
+
+template<class OType>
+OType& CSimpleVector<OType>::operator [] (const int index)
+{
+    return(Array[index]);
+}
+
+//------------------------------------------------------------------------------
+
+template<class OType>
 const OType& CSimpleVector<OType>::operator [] (const size_t index) const
+{
+    return(Array[index]);
+}
+
+//------------------------------------------------------------------------------
+
+template<class OType>
+const OType& CSimpleVector<OType>::operator [] (const long int index) const
+{
+    return(Array[index]);
+}
+
+//------------------------------------------------------------------------------
+
+template<class OType>
+const OType& CSimpleVector<OType>::operator [] (const unsigned int index) const
+{
+    return(Array[index]);
+}
+
+//------------------------------------------------------------------------------
+
+template<class OType>
+const OType& CSimpleVector<OType>::operator [] (const int index) const
 {
     return(Array[index]);
 }
