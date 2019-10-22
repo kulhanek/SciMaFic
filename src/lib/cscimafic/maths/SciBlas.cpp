@@ -32,9 +32,9 @@ double CSciBlas::dot(CVector& a,CVector& b)
     if( a.GetLength() != b.GetLength() ){
         RUNTIME_ERROR("lengths of A and B are not the same");
     }
-    int inc = 1;
+    BL_INT inc = 1;
     double rv = 0.0;
-    int n = a.GetLength();
+    BL_INT n = a.GetLength();
     rv = ddot_(&n,a.GetRawDataField(),&inc,b.GetRawDataField(),&inc);
     return(rv);
 }
@@ -43,15 +43,15 @@ double CSciBlas::dot(CVector& a,CVector& b)
 
 void CSciBlas::gemv(double alpha,CFortranMatrix& a,CVector& x,double beta,CVector& y)
 {
-    int inc = 1;
+    BL_INT inc = 1;
     char trans = 'N';
-    int m = a.GetNumberOfRows();
-    int n = a.GetNumberOfColumns();
+    BL_INT m = a.GetNumberOfRows();
+    BL_INT n = a.GetNumberOfColumns();
 
-    if( n != x.GetLength() ){
+    if( a.GetNumberOfColumns() != x.GetLength() ){
         RUNTIME_ERROR("matrix - vector inconsistency - columns");
     }
-    if( m != y.GetLength() ){
+    if( a.GetNumberOfRows() != y.GetLength() ){
         RUNTIME_ERROR("matrix - vector inconsistency - rows");
     }
 

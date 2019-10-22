@@ -22,6 +22,7 @@
 //==============================================================================
 
 #include <SciMaFicMainHeader.hpp>
+#include <stddef.h>
 
 //------------------------------------------------------------------------------
 
@@ -32,17 +33,17 @@ class CFortranMatrix;
 class SCIMAFIC_PACKAGE CFortranRow {
 public:
 // access method -------------------------------------------------------------
-    double  operator[](int column) const;
-    double& operator[](int column);
+    double  operator[](const size_t column) const;
+    double& operator[](const size_t column);
 
 private:
-    CFortranRow(CFortranMatrix* p_matrix,unsigned int row);
-    CFortranRow(const CFortranMatrix* p_matrix,unsigned int row);
+    CFortranRow(CFortranMatrix* p_matrix,const size_t row);
+    CFortranRow(const CFortranMatrix* p_matrix,const size_t row);
 
 // section of private data ----------------------------------------------------
 private:
     CFortranMatrix* Matrix;
-    unsigned int    Row;
+    size_t          Row;
 
     friend class CFortranMatrix;
 };

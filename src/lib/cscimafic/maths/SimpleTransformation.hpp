@@ -445,7 +445,7 @@ void CSimpleTransformation<type>::QuaternionFit(
     xzyy = 0.0;
     xzyz = 0.0;
 
-    for(int i = 0; i < ref.GetLength(); i++) {
+    for(size_t i = 0; i < ref.GetLength(); i++) {
         rx = sys[i].x;
         ry = sys[i].y;
         rz = sys[i].z;

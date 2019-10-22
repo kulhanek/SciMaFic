@@ -73,9 +73,9 @@ void CSciLapack::SetNumThreadsLocal(int nthrs)
 
 int CSciLapack::syev(char jobz,char uplo,CFortranMatrix& a,CVector& w,CVector& work)
 {
-    int info = 0;
-    int nrows = a.GetNumberOfRows();
-    int nwork = work.GetLength();
+    BL_INT info = 0;
+    BL_INT nrows = a.GetNumberOfRows();
+    BL_INT nwork = work.GetLength();
 
     dsyev_(&jobz,&uplo,&nrows,a.GetRawDataField(),&nrows,w.GetRawDataField(),
            work.GetRawDataField(),&nwork,&info);
@@ -87,9 +87,9 @@ int CSciLapack::syev(char jobz,char uplo,CFortranMatrix& a,CVector& w,CVector& w
 
 int CSciLapack::syev(char jobz,char uplo,CFortranMatrix& a,CVector& w)
 {
-    int     info = 0;
-    int     nrows = a.GetNumberOfRows();
-    int     nwork = -1;
+    BL_INT     info = 0;
+    BL_INT     nrows = a.GetNumberOfRows();
+    BL_INT     nwork = -1;
     double  twork[1];
 
     // query workspace length
@@ -104,7 +104,7 @@ int CSciLapack::syev(char jobz,char uplo,CFortranMatrix& a,CVector& w)
 
     // allocate work space
     CVector work;
-    nwork = static_cast<int>(twork[0]) + 1;
+    nwork = static_cast<BL_INT>(twork[0]) + 1;
     work.CreateVector(nwork);
 
     // run again
@@ -118,8 +118,8 @@ int CSciLapack::syev(char jobz,char uplo,CFortranMatrix& a,CVector& w)
 
 int CSciLapack::solvle(CFortranMatrix& a,CVector& rhs)
 {
-    int info = 0;
-    int ndimm = a.GetNumberOfRows();
+    BL_INT info = 0;
+    BL_INT ndimm = a.GetNumberOfRows();
 
     if( ndimm == 0 ){
         ES_ERROR("no rows in rhs");
@@ -129,12 +129,12 @@ int CSciLapack::solvle(CFortranMatrix& a,CVector& rhs)
         ES_ERROR("matrix A must be a square matrix");
         return(-1);
     }
-    if( (int)a.GetNumberOfRows() != rhs.GetLength() ){
+    if( a.GetNumberOfRows() != rhs.GetLength() ){
         ES_ERROR("rhs is not compatible with A");
         return(-1);
     }
 
-    int* indx = new int[ndimm];
+    BL_INT* indx = new BL_INT[ndimm];
 
     dgetrf_(&ndimm,&ndimm,a.GetRawDataField(),&ndimm,indx,&info);
     if( info != 0 ){
@@ -144,7 +144,7 @@ int CSciLapack::solvle(CFortranMatrix& a,CVector& rhs)
     }
 
     char trans = 'N';
-    int  nrshs = 1;
+    BL_INT  nrshs = 1;
     dgetrs_(&trans,&ndimm,&nrshs,a.GetRawDataField(),&ndimm,indx,rhs.GetRawDataField(),&ndimm,&info);
     if( info != 0 ){
         delete[] indx;
@@ -160,30 +160,34 @@ int CSciLapack::solvle(CFortranMatrix& a,CVector& rhs)
 
 int CSciLapack::gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank)
 {
-    int m = a.GetNumberOfRows();
-    int n = a.GetNumberOfColumns();
-    int nrhs = 1;
-    int lda = m;
-    int ldb = std::max(m,n);
+    BL_INT m = a.GetNumberOfRows();
+    BL_INT n = a.GetNumberOfColumns();
+    BL_INT nrhs = 1;
+    BL_INT lda = m;
+    BL_INT ldb = std::max(m,n);
 
     CVector s;
-    int     ns = std::min(m,n);
+    BL_INT     ns = std::min(m,n);
     s.CreateVector(ns);
 
-    int info = 0;
+    BL_INT info = 0;
 
     // query work size
-    int     lwork = -1;
+    BL_INT     lwork = -1;
     double  twork[1];
 
     // printf("lwork = %d\n",lwork);
 
-    CSimpleVector<int>  iwork;
-    int li = 3*std::min(m,n)*std::min(m,n) + 11*std::min(m,n);
+    CSimpleVector<BL_INT>  iwork;
+    BL_INT li = 3*std::min(m,n)*std::min(m,n) + 11*std::min(m,n);
     iwork.CreateVector(li);
 
+    BL_INT lrank = 0;
+
     dgelsd_(&m,&n,&nrhs,a.GetRawDataField(),&lda,rhs.GetRawDataField(),&ldb,s.GetRawDataField(),
-            &rcond,&rank,twork,&lwork,iwork.GetRawDataField(),&info);
+            &rcond,&lrank,twork,&lwork,iwork.GetRawDataField(),&info);
+
+    rank = lrank;
 
     if( info != 0 ){
         CSmallString error;
@@ -191,7 +195,7 @@ int CSciLapack::gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank)
         INVALID_ARGUMENT(error);
     }
 
-    lwork = static_cast<int>(twork[0]) + 1;
+    lwork = static_cast<BL_INT>(twork[0]) + 1;
     if( lwork < 0 ){
         stringstream error;
         error << "memory request overflow, twork = " << twork[0] << " -> lwork = " << lwork;
@@ -203,9 +207,13 @@ int CSciLapack::gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank)
     CSimpleVector<double>  work;
     work.CreateVector(lwork);
 
+    lrank = 0;
+
     // run svd
     dgelsd_(&m,&n,&nrhs,a.GetRawDataField(),&lda,rhs.GetRawDataField(),&ldb,s.GetRawDataField(),
-            &rcond,&rank,work.GetRawDataField(),&lwork,iwork.GetRawDataField(),&info);
+            &rcond,&lrank,work.GetRawDataField(),&lwork,iwork.GetRawDataField(),&info);
+
+    rank = lrank;
 
     return(info);
 }
@@ -215,15 +223,15 @@ int CSciLapack::gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank)
 int CSciLapack::gels(CFortranMatrix& a,CVector& rhs)
 {
     char trans = 'N';
-    int m = a.GetNumberOfRows();
-    int n = a.GetNumberOfColumns();
-    int nrhs = 1;
-    int lda = m;
-    int ldb = std::max(m,n);
-    int info = 0;
+    BL_INT m = a.GetNumberOfRows();
+    BL_INT n = a.GetNumberOfColumns();
+    BL_INT nrhs = 1;
+    BL_INT lda = m;
+    BL_INT ldb = std::max(m,n);
+    BL_INT info = 0;
 
     // query work size
-    int     lwork = -1;
+    BL_INT     lwork = -1;
     double  twork[1];
 
     dgels_(&trans,&m,&n,&nrhs,a.GetRawDataField(),&lda,rhs.GetRawDataField(),&ldb,
@@ -236,7 +244,7 @@ int CSciLapack::gels(CFortranMatrix& a,CVector& rhs)
         return(info);
     }
 
-    lwork = static_cast<int>(twork[0]) + 1;
+    lwork = static_cast<BL_INT>(twork[0]) + 1;
     if( lwork < 0 ){
         stringstream error;
         error << "memory request overflow, twork = " << twork[0] << " -> lwork = " << lwork;
@@ -259,8 +267,8 @@ int CSciLapack::gels(CFortranMatrix& a,CVector& rhs)
 
 int CSciLapack::invLU(CFortranMatrix& a,double& logdet)
 {
-    int info = 0;
-    int ndimm = a.GetNumberOfRows();
+    BL_INT info = 0;
+    BL_INT ndimm = a.GetNumberOfRows();
 
     logdet = 0.0;
 
@@ -273,7 +281,7 @@ int CSciLapack::invLU(CFortranMatrix& a,double& logdet)
         return(-1);
     }
 
-    int* indx = new int[ndimm];
+    BL_INT* indx = new BL_INT[ndimm];
 
     dgetrf_(&ndimm,&ndimm,a.GetRawDataField(),&ndimm,indx,&info);
     if( info != 0 ){
@@ -283,12 +291,12 @@ int CSciLapack::invLU(CFortranMatrix& a,double& logdet)
     }
 
     // calculate log determinat of A
-    for(int i=0; i < ndimm; i++){
+    for(BL_INT i=0; i < ndimm; i++){
         logdet += log(fabs(a[i][i]));
     }
 
     // query work size
-    int     lwork = -1;
+    BL_INT     lwork = -1;
     double  twork[1];
 
     dgetri_(&ndimm,a.GetRawDataField(),&ndimm,indx,twork,&lwork,&info);
@@ -301,7 +309,7 @@ int CSciLapack::invLU(CFortranMatrix& a,double& logdet)
         return(info);
     }
 
-    lwork = static_cast<int>(twork[0]) + 1;
+    lwork = static_cast<BL_INT>(twork[0]) + 1;
     if( lwork < 0 ){
         stringstream error;
         error << "memory request overflow, twork = " << twork[0] << " -> lwork = " << lwork;
@@ -333,8 +341,8 @@ int CSciLapack::invLU(CFortranMatrix& a,double& logdet)
 
 int CSciLapack::invLL(CFortranMatrix& a,double& logdet)
 {
-    int info = 0;
-    int ndimm = a.GetNumberOfRows();
+    BL_INT info = 0;
+    BL_INT ndimm = a.GetNumberOfRows();
 
     logdet = 0.0;
 
@@ -355,7 +363,7 @@ int CSciLapack::invLL(CFortranMatrix& a,double& logdet)
     }
 
     // calculate log determinat of A
-    for(int i=0; i < ndimm; i++){
+    for(BL_INT i=0; i < ndimm; i++){
         logdet += 2.0*log(fabs(a[i][i]));
     }
 
@@ -369,8 +377,8 @@ int CSciLapack::invLL(CFortranMatrix& a,double& logdet)
     }
 
     // reconstruct the upper part of matrix
-    for(int i=0; i < ndimm; i++){
-        for(int j=0; j < i; j++){
+    for(BL_INT i=0; i < ndimm; i++){
+        for(BL_INT j=0; j < i; j++){
             a[j][i] = a[i][j];
         }
     }
@@ -382,8 +390,8 @@ int CSciLapack::invLL(CFortranMatrix& a,double& logdet)
 
 int CSciLapack::invSVD1(CFortranMatrix& a,double& logdet,double rcond,int& rank,double& a_rcond)
 {
-    int info = 0;
-    int ndimm = a.GetNumberOfRows();
+    BL_INT info = 0;
+    BL_INT ndimm = a.GetNumberOfRows();
 
     logdet = 0.0;
     rank = 0;
@@ -398,9 +406,9 @@ int CSciLapack::invSVD1(CFortranMatrix& a,double& logdet,double rcond,int& rank,
         return(-1);
     }
 
-    int m = a.GetNumberOfRows();
-    int n = a.GetNumberOfColumns();
-    int k = std::min(m,n);
+    BL_INT m = a.GetNumberOfRows();
+    BL_INT n = a.GetNumberOfColumns();
+    BL_INT k = std::min(m,n);
 
     CVector         sig;
     CFortranMatrix  u;
@@ -420,7 +428,7 @@ int CSciLapack::invSVD1(CFortranMatrix& a,double& logdet,double rcond,int& rank,
     sig_plus.SetZero();
 
     // query work size
-    int     lwork = -1;
+    BL_INT     lwork = -1;
     double  twork[1];
 
     //     lwork = -1
@@ -435,7 +443,7 @@ int CSciLapack::invSVD1(CFortranMatrix& a,double& logdet,double rcond,int& rank,
         return(info);
     }
 
-    lwork = static_cast<int>(twork[0]) + 1;
+    lwork = static_cast<BL_INT>(twork[0]) + 1;
     if( lwork < 0 ){
         stringstream error;
         error << "memory request overflow, twork = " << twork[0] << " -> lwork = " << lwork;
@@ -461,7 +469,7 @@ int CSciLapack::invSVD1(CFortranMatrix& a,double& logdet,double rcond,int& rank,
     // invert singular numbers
     double maxval = sig[0];
     double minval = sig[0];
-    for(int i=0; i < k; i++){
+    for(size_t i=0; i < (size_t)k; i++){
         if( maxval < sig[i] ){
             maxval = sig[i];
         }
@@ -472,7 +480,7 @@ int CSciLapack::invSVD1(CFortranMatrix& a,double& logdet,double rcond,int& rank,
 
     a_rcond = minval/maxval;
 
-    for(int i=0; i < k; i++){
+    for(size_t i=0; i < (size_t)k; i++){
         if( sig[i] > rcond*maxval ) {
            logdet += log(fabs(sig[i]));
            sig_plus[i][i] = 1.0/sig[i];
@@ -500,8 +508,8 @@ int CSciLapack::invSVD1(CFortranMatrix& a,double& logdet,double rcond,int& rank,
 
 int CSciLapack::invSVD2(CFortranMatrix& a,double& logdet,double rcond,int& rank,double& a_rcond)
 {
-    int info = 0;
-    int ndimm = a.GetNumberOfRows();
+    BL_INT info = 0;
+    BL_INT ndimm = a.GetNumberOfRows();
 
     logdet = 0.0;
     rank = 0;
@@ -516,9 +524,9 @@ int CSciLapack::invSVD2(CFortranMatrix& a,double& logdet,double rcond,int& rank,
         return(-1);
     }
 
-    int m = a.GetNumberOfRows();
-    int n = a.GetNumberOfColumns();
-    int k = std::min(m,n);
+    BL_INT m = a.GetNumberOfRows();
+    BL_INT n = a.GetNumberOfColumns();
+    BL_INT k = std::min(m,n);
 
     CVector         sig;
     CFortranMatrix  u;
@@ -537,10 +545,10 @@ int CSciLapack::invSVD2(CFortranMatrix& a,double& logdet,double rcond,int& rank,
     sig.SetZero();
     sig_plus.SetZero();
 
-    int* iwork = new int[8*k];
+    BL_INT* iwork = new BL_INT[8*k];
 
     // query work size
-    int     lwork = -1;
+    BL_INT     lwork = -1;
     double  twork[1];
 
     //     lwork = -1
@@ -556,7 +564,7 @@ int CSciLapack::invSVD2(CFortranMatrix& a,double& logdet,double rcond,int& rank,
         return(info);
     }
 
-    lwork = static_cast<int>(twork[0]) + 1;
+    lwork = static_cast<BL_INT>(twork[0]) + 1;
     if( lwork < 0 ){
         stringstream error;
         error << "memory request overflow, twork = " << twork[0] << " -> lwork = " << lwork;
@@ -585,7 +593,7 @@ int CSciLapack::invSVD2(CFortranMatrix& a,double& logdet,double rcond,int& rank,
     // invert singular numbers
     double maxval = sig[0];
     double minval = sig[0];
-    for(int i=0; i < k; i++){
+    for(size_t i=0; i < (size_t)k; i++){
         if( maxval < sig[i] ){
             maxval = sig[i];
         }
@@ -596,7 +604,7 @@ int CSciLapack::invSVD2(CFortranMatrix& a,double& logdet,double rcond,int& rank,
 
     a_rcond = minval/maxval;
 
-    for(int i=0; i < k; i++){
+    for(size_t i=0; i < (size_t)k; i++){
         if( sig[i] > rcond*maxval ) {
            logdet += log(fabs(sig[i]));
            sig_plus[i][i] = 1.0/sig[i];

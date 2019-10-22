@@ -23,6 +23,7 @@
 
 #include <SciMaFicMainHeader.hpp>
 #include <FortranRow.hpp>
+#include <stddef.h>
 
 //------------------------------------------------------------------------------
 
@@ -37,21 +38,21 @@ public:
     ~CFortranMatrix(void);
 
 // setup methods ---------------------------------------------------------------
-    bool CreateMatrix(unsigned int rows,unsigned int columns);
+    bool CreateMatrix(const size_t rows,const size_t columns);
     void FreeMatrix(void);
 
 // information method ----------------------------------------------------------
-    unsigned int GetNumberOfRows(void) const;
-    unsigned int GetNumberOfColumns(void) const;
-    double*      GetRawDataField(void);
+    size_t  GetNumberOfRows(void) const;
+    size_t  GetNumberOfColumns(void) const;
+    double* GetRawDataField(void);
 
 // set method ------------------------------------------------------------------
     void SetZero(void);
     bool SetUnit(void);
 
 // access method ---------------------------------------------------------------
-    const CFortranRow operator[](int row) const;
-    CFortranRow       operator[](int row);
+    const CFortranRow operator[](const size_t row) const;
+    CFortranRow       operator[](const size_t row);
     void              operator=(const CFortranMatrix& src);
 
 // I/O methods -----------------------------------------------------------------
@@ -63,9 +64,9 @@ public:
 
 // section of private data -----------------------------------------------------
 private:
-    unsigned int     NRows;
-    unsigned int     NColumns;
-    double*          Array;
+    size_t      NRows;
+    size_t      NColumns;
+    double*     Array;
 
     friend class CFortranRow;
 };

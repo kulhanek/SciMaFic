@@ -26,14 +26,14 @@
 //------------------------------------------------------------------------------
 //==============================================================================
 
-double CFortranRow::operator[](int column) const
+double CFortranRow::operator[](const size_t column) const
 {
     return(Matrix->Array[column*Matrix->NRows + Row]);
 }
 
 //------------------------------------------------------------------------------
 
-double& CFortranRow::operator[](int column)
+double& CFortranRow::operator[](const size_t column)
 {
     return(Matrix->Array[column*Matrix->NRows + Row]);
 }
@@ -42,7 +42,7 @@ double& CFortranRow::operator[](int column)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-CFortranRow::CFortranRow(CFortranMatrix* p_matrix,unsigned int row)
+CFortranRow::CFortranRow(CFortranMatrix* p_matrix,const size_t row)
 {
     Matrix = p_matrix;
     Row = row;
@@ -50,7 +50,7 @@ CFortranRow::CFortranRow(CFortranMatrix* p_matrix,unsigned int row)
 
 //------------------------------------------------------------------------------
 
-CFortranRow::CFortranRow(const CFortranMatrix* p_matrix,unsigned int row)
+CFortranRow::CFortranRow(const CFortranMatrix* p_matrix,const size_t row)
 {
     Matrix = (CFortranMatrix*)p_matrix;
     Row = row;

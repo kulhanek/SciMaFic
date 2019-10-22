@@ -1,42 +1,45 @@
 #ifndef BlasLapackHPP
 #define BlasLapackHPP
 
+// standard 32-bit integer
+typedef int BL_INT;
+
 //------------------------------------------------------------------------------
 // blas entry points
 
-extern "C" double ddot_(int* N,double* DX,int* INCX,double* DY,int* INCY);
-extern "C" void dgemv_(char* trans,int* M, int* N, double* ALPHA,
-                      double* A,int* LDA,double* X,int* INCX,double* BETA,double* Y,int* INCY);
+extern "C" double ddot_(BL_INT* N,double* DX,BL_INT* INCX,double* DY,BL_INT* INCY);
+extern "C" void dgemv_(char* trans,BL_INT* M, BL_INT* N, double* ALPHA,
+                      double* A,BL_INT* LDA,double* X,BL_INT* INCX,double* BETA,double* Y,BL_INT* INCY);
 
-extern "C" void dgemm_(char* transa, char* transb,int* M,int* N,int* K,double* alpha,
-                       double* a,int* lda,double* b,int* ldb,double* beta,double* c, int* ldc);
+extern "C" void dgemm_(char* transa, char* transb,BL_INT* M,BL_INT* N,BL_INT* K,double* alpha,
+                       double* a,BL_INT* lda,double* b,BL_INT* ldb,double* beta,double* c, BL_INT* ldc);
 
 //------------------------------------------------------------------------------
 // lapack entry points
 
-extern "C" void dsyev_(char* jobz,char* uplo,int* n,double* a,int* lda,double* w,
-                       double* work,int* lwork,int* info);
+extern "C" void dsyev_(char* jobz,char* uplo,BL_INT* n,double* a,BL_INT* lda,double* w,
+                       double* work,BL_INT* lwork,BL_INT* info);
 
-extern "C" void dgetrf_(int* m,int* n,double* a,int* lda,int* ipiv,int* info);
-extern "C" void dgetrs_(char* trans,int* n,int* nrhs,double* a,int* lda,int* ipiv,double* b,int* ldb,int* info);
-extern "C" void dgelsd_(int* m,int* n,int* nrhs,double* a,int* lda, double* b,int* ldb,
-                        double* s, double* rcond, int* rank,
-                        double* work, int* lwork, int* iwork, int* info);
-extern "C" void dgels_(char* trans,int* m,int* n,int* nrhs,double* a,int* lda, double* b,int* ldb,
-                        double* work, int* lwork, int* info);
-extern "C" void dgetri_(int* m,double* a,int* lda,int* ipiv,double* work, int* lwork,int* info);
+extern "C" void dgetrf_(BL_INT* m,BL_INT* n,double* a,BL_INT* lda,BL_INT* ipiv,BL_INT* info);
+extern "C" void dgetrs_(char* trans,BL_INT* n,BL_INT* nrhs,double* a,BL_INT* lda,BL_INT* ipiv,double* b,BL_INT* ldb,BL_INT* info);
+extern "C" void dgelsd_(BL_INT* m,BL_INT* n,BL_INT* nrhs,double* a,BL_INT* lda, double* b,BL_INT* ldb,
+                        double* s, double* rcond, BL_INT* rank,
+                        double* work, BL_INT* lwork, BL_INT* iwork, BL_INT* info);
+extern "C" void dgels_(char* trans,BL_INT* m,BL_INT* n,BL_INT* nrhs,double* a,BL_INT* lda, double* b,BL_INT* ldb,
+                        double* work, BL_INT* lwork, BL_INT* info);
+extern "C" void dgetri_(BL_INT* m,double* a,BL_INT* lda,BL_INT* ipiv,double* work, BL_INT* lwork,BL_INT* info);
 
 // SVD - simple driver
-extern "C" void dgesvd_(char* jobu,char* jobvt,int* m,int* n,double* a,int* lda,double* s,double* u,int* ldu,
-                        double* vt,int* ldvt,double* work,int* lwork,int* info);
+extern "C" void dgesvd_(char* jobu,char* jobvt,BL_INT* m,BL_INT* n,double* a,BL_INT* lda,double* s,double* u,BL_INT* ldu,
+                        double* vt,BL_INT* ldvt,double* work,BL_INT* lwork,BL_INT* info);
 
 // SVD - divide and conquer
-extern "C" void dgesdd_(char* jobz,int* m,int* n,double* a,int* lda,double* s,double* u,int* ldu,
-                        double* vt,int* ldvt,double* work,int* lwork,int* iwork,int* info);
+extern "C" void dgesdd_(char* jobz,BL_INT* m,BL_INT* n,double* a,BL_INT* lda,double* s,double* u,BL_INT* ldu,
+                        double* vt,BL_INT* ldvt,double* work,BL_INT* lwork,BL_INT* iwork,BL_INT* info);
 
 // Cholesky factorization
-extern "C" void dpotrf_(char* uplo,int* n,double* a,int* lda,int* info);
-extern "C" void dpotri_(char* uplo,int* n,double* a,int* lda,int* info);
+extern "C" void dpotrf_(char* uplo,BL_INT* n,double* a,BL_INT* lda,BL_INT* info);
+extern "C" void dpotri_(char* uplo,BL_INT* n,double* a,BL_INT* lda,BL_INT* info);
 
 //------------------------------------------------------------------------------
 

@@ -170,7 +170,7 @@ bool CXYZStructure::Load(CXMLElement* p_ele)
     Atoms.CreateVector(natoms);
 
     CXMLIterator   I(p_aele);
-    for(int i=0; i < Atoms.GetLength(); i++) {
+    for(size_t i=0; i < Atoms.GetLength(); i++) {
         CXMLElement* p_at = I.GetNextChildElement("ATOM");
         if( p_at == NULL ) {
             ES_ERROR("unable to get ATOM element");
@@ -206,7 +206,7 @@ void CXYZStructure::Save(CXMLElement* p_ele)
     CXMLElement* p_aele = p_ele->CreateChildElement("ATOMS");
     p_aele->SetAttribute("natoms",Atoms.GetLength());
 
-    for(int i=0; i < Atoms.GetLength(); i++) {
+    for(size_t i=0; i < Atoms.GetLength(); i++) {
         CXMLElement* p_at = p_aele->CreateChildElement("ATOM");
 
         CXYZAtom* p_atom = &Atoms[i];

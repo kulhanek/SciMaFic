@@ -58,14 +58,14 @@ CFortranMatrix::CFortranMatrix(const CFortranMatrix& src)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-unsigned int CFortranMatrix::GetNumberOfRows(void) const
+size_t CFortranMatrix::GetNumberOfRows(void) const
 {
     return(NRows);
 }
 
 //------------------------------------------------------------------------------
 
-unsigned int CFortranMatrix::GetNumberOfColumns(void) const
+size_t CFortranMatrix::GetNumberOfColumns(void) const
 {
     return(NColumns);
 }
@@ -81,7 +81,7 @@ double* CFortranMatrix::GetRawDataField(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CFortranMatrix::CreateMatrix(unsigned int nrows,unsigned int ncolumns)
+bool CFortranMatrix::CreateMatrix(size_t nrows,size_t ncolumns)
 {
     if( Array != NULL ) {
         delete[] Array;
@@ -120,7 +120,7 @@ void CFortranMatrix::FreeMatrix(void)
 
 void CFortranMatrix::SetZero(void)
 {
-    for(unsigned int i=0; i < NRows*NColumns; i++) {
+    for(size_t i=0; i < NRows*NColumns; i++) {
         Array[i] = 0.0;
     }
 }
@@ -134,8 +134,8 @@ bool CFortranMatrix::SetUnit(void)
         return(false);
     }
 
-    for(unsigned int i=0; i < NRows; i++) {
-        for(unsigned int j=0; j < NColumns; j++) {
+    for(size_t i=0; i < NRows; i++) {
+        for(size_t j=0; j < NColumns; j++) {
             if( i != j ) {
                 (*this)[i][j] = 0.0;
             } else {
@@ -150,14 +150,14 @@ bool CFortranMatrix::SetUnit(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-const CFortranRow CFortranMatrix::operator[](int row) const
+const CFortranRow CFortranMatrix::operator[](const size_t row) const
 {
     return(CFortranRow(this,row));
 }
 
 //------------------------------------------------------------------------------
 
-CFortranRow CFortranMatrix::operator[](int row)
+CFortranRow CFortranMatrix::operator[](const size_t row)
 {
     return(CFortranRow(this,row));
 }
@@ -181,12 +181,12 @@ void CFortranMatrix::Load(CXMLBinData* p_ele)
     }
 
 // get size
-    unsigned int size;
+    size_t size;
     size = p_ele->GetLength();
     if( size <= 0 ) return;
 
-    int rows = 0;
-    int columns = 0;
+    size_t rows = 0;
+    size_t columns = 0;
 
     p_ele->GetAttribute("rows",rows);
     p_ele->GetAttribute("columns",columns);

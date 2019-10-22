@@ -79,7 +79,7 @@ bool CXYZGradient::LoadGradient(FILE* p_fin)
     }
 
     // load data
-    for(int i=0; i < GetLength(); i++) {
+    for(size_t i=0; i < GetLength(); i++) {
         /*    CPoint* p_atom = &AtomList[i];
             if( fscanf(p_fin,"%lf %lf %lf",&p_atom->x,&p_atom->y,&p_atom->z) != 3 ) return(false);*/
     }
@@ -109,13 +109,13 @@ bool CXYZGradient::SaveGradient(const CSmallString& name)
 bool CXYZGradient::SaveGradient(FILE* p_fout)
 {
     // write number of atoms
-    if( fprintf(p_fout,"%d\n",GetLength()) <= 0 ) return(false);
+    if( fprintf(p_fout,"%ld\n",GetLength()) <= 0 ) return(false);
 
     // write comment
     if( fprintf(p_fout,"%s\n",(const char*)Comment) <= 0 ) return(false);
 
     // write data
-    for(int i=0; i < GetLength(); i++) {
+    for(size_t i=0; i < GetLength(); i++) {
         /*    CPoint* p_atom = &AtomList[i];
              if( fprintf(p_fout,"%+16.13e %+16.13e %+16.13e\n",p_atom->x,p_atom->y,p_atom->z) <= 0 ) */return(false);
     }

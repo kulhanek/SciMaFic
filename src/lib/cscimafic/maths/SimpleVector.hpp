@@ -49,12 +49,12 @@ public:
 
 // allocation/deallocation methods --------------------------------------------
     /// create vector of size
-    void CreateVector(int size);
+    void CreateVector(size_t size);
     /// deallocate vector
     void FreeVector(void);
 
     /// return length of vector
-    int GetLength(void) const;
+    size_t GetLength(void) const;
 
 // input/output methods ------------------------------------------------------
     /// load vector from XML binary element
@@ -72,12 +72,10 @@ public:
 
 // operators ------------------------------------------------------------------
     /// access indivudual vector elements
-    OType& operator [] (const unsigned int index);
-    OType& operator [] (const int index);
+    OType& operator [] (const size_t index);
 
     /// access individual vector elements
-    const OType& operator [] (const unsigned int index) const;
-    const OType& operator [] (const int index) const;
+    const OType& operator [] (const size_t index) const;
 
     /// return pointer to vector array
     operator const OType*() const;
@@ -90,8 +88,8 @@ public:
 
 // section of private data -----------------------------------------------------
 private:
-    long unsigned int   Size;       // size of array
-    OType*              Array;      // array
+    size_t  Size;       // size of array
+    OType*  Array;      // array
 };
 
 //==============================================================================
@@ -126,7 +124,7 @@ CSimpleVector<OType>::CSimpleVector(const CSimpleVector<IType>& src)
     Size = 0;
     Array = NULL;
     CreateVector(src.GetLength());
-    for(long unsigned int i=0; i < Size; i++) {
+    for(size_t i=0; i < Size; i++) {
         Array[i] = src[i];
     }
 }
@@ -149,7 +147,7 @@ template <class OType> template<class IType>
 CSimpleVector<OType>&  CSimpleVector<OType>::operator=(const CSimpleVector<IType>& src)
 {
     CreateVector(src.GetLength());
-    for(int i=0; i < Size; i++) {
+    for(size_t i=0; i < Size; i++) {
         Array[i] = src[i];
     }
     return(*this);
@@ -168,12 +166,8 @@ CSimpleVector<OType>::~CSimpleVector(void)
 //==============================================================================
 
 template<class OType>
-void CSimpleVector<OType>::CreateVector(int size)
+void CSimpleVector<OType>::CreateVector(size_t size)
 {
-    if( size < 0 ){
-        INVALID_ARGUMENT("size < 0");
-    }
-
     if(Size > 0) {
         FreeVector();
     }
@@ -196,7 +190,7 @@ void CSimpleVector<OType>::FreeVector(void)
 //------------------------------------------------------------------------------
 
 template<class OType>
-int CSimpleVector<OType>::GetLength(void) const
+size_t CSimpleVector<OType>::GetLength(void) const
 {
     return(Size);
 }
@@ -211,7 +205,7 @@ void CSimpleVector<OType>::Load(CXMLBinData* p_ele)
     }
 
 // get size
-    unsigned int size;
+    size_t size;
     size = p_ele->GetLength();
     if( size <= 0 ) return;
 
@@ -274,7 +268,7 @@ void CSimpleVector<OType>::Save(CXMLBinData* p_ele)
 template<class OType>
 void CSimpleVector<OType>::SetZero(void)
 {
-    for(long unsigned int i=0; i < Size; i++) Array[i] = 0;
+    for(size_t i=0; i < Size; i++) Array[i] = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -282,13 +276,13 @@ void CSimpleVector<OType>::SetZero(void)
 template<class OType>
 void CSimpleVector<OType>::Set(OType value)
 {
-    for(long unsigned int i=0; i < Size; i++) Array[i] = value;
+    for(size_t i=0; i < Size; i++) Array[i] = value;
 }
 
 //------------------------------------------------------------------------------
 
 template<class OType>
-OType& CSimpleVector<OType>::operator [] (const unsigned int index)
+OType& CSimpleVector<OType>::operator [] (const size_t index)
 {
     return(Array[index]);
 }
@@ -296,23 +290,7 @@ OType& CSimpleVector<OType>::operator [] (const unsigned int index)
 //------------------------------------------------------------------------------
 
 template<class OType>
-OType& CSimpleVector<OType>::operator [] (const int index)
-{
-    return(Array[index]);
-}
-
-//------------------------------------------------------------------------------
-
-template<class OType>
-const OType& CSimpleVector<OType>::operator [] (const unsigned int index) const
-{
-    return(Array[index]);
-}
-
-//------------------------------------------------------------------------------
-
-template<class OType>
-const OType& CSimpleVector<OType>::operator [] (const int index) const
+const OType& CSimpleVector<OType>::operator [] (const size_t index) const
 {
     return(Array[index]);
 }
