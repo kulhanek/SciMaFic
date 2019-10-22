@@ -50,7 +50,7 @@ public:
     /// solve least square problem - SVD
     static int gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank);
 
-    /// solve least square problem
+    /// solve least square problem - QR
     static int gels(CFortranMatrix& a,CVector& rhs);
 
     /// inverse matrix by dgetrf and dgetri (via LU)
@@ -63,11 +63,11 @@ public:
 
     /// inverse matrix by SVD - simple driver
     /// logdet is logarithm of determinat of original matrix
-    static int invSVD1(CFortranMatrix& a,double& logdet,double rcond,int& rank);
+    static int invSVD1(CFortranMatrix& a,double& logdet,double rcond,int& rank,double& a_rcond);
 
     /// inverse matrix by SVD - divide and qonquer
     /// logdet is logarithm of determinat of original matrix
-    static int invSVD2(CFortranMatrix& a,double& logdet,double rcond,int& rank);
+    static int invSVD2(CFortranMatrix& a,double& logdet,double rcond,int& rank,double& a_rcond);
 };
 
 //------------------------------------------------------------------------------

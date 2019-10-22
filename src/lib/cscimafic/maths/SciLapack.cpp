@@ -380,13 +380,14 @@ int CSciLapack::invLL(CFortranMatrix& a,double& logdet)
 
 //------------------------------------------------------------------------------
 
-int CSciLapack::invSVD1(CFortranMatrix& a,double& logdet,double rcond,int& rank)
+int CSciLapack::invSVD1(CFortranMatrix& a,double& logdet,double rcond,int& rank,double& a_rcond)
 {
     int info = 0;
     int ndimm = a.GetNumberOfRows();
 
     logdet = 0.0;
     rank = 0;
+    a_rcond = 0.0;
 
     if( ndimm == 0 ){
         ES_ERROR("no rows in a");
@@ -459,11 +460,17 @@ int CSciLapack::invSVD1(CFortranMatrix& a,double& logdet,double rcond,int& rank)
 
     // invert singular numbers
     double maxval = sig[0];
+    double minval = sig[0];
     for(int i=0; i < k; i++){
         if( maxval < sig[i] ){
             maxval = sig[i];
         }
+        if( minval > sig[i] ){
+            minval = sig[i];
+        }
     }
+
+    a_rcond = minval/maxval;
 
     for(int i=0; i < k; i++){
         if( sig[i] > rcond*maxval ) {
@@ -491,13 +498,14 @@ int CSciLapack::invSVD1(CFortranMatrix& a,double& logdet,double rcond,int& rank)
 
 //------------------------------------------------------------------------------
 
-int CSciLapack::invSVD2(CFortranMatrix& a,double& logdet,double rcond,int& rank)
+int CSciLapack::invSVD2(CFortranMatrix& a,double& logdet,double rcond,int& rank,double& a_rcond)
 {
     int info = 0;
     int ndimm = a.GetNumberOfRows();
 
     logdet = 0.0;
     rank = 0;
+    a_rcond = 0.0;
 
     if( ndimm == 0 ){
         ES_ERROR("no rows in a");
@@ -576,11 +584,17 @@ int CSciLapack::invSVD2(CFortranMatrix& a,double& logdet,double rcond,int& rank)
 
     // invert singular numbers
     double maxval = sig[0];
+    double minval = sig[0];
     for(int i=0; i < k; i++){
         if( maxval < sig[i] ){
             maxval = sig[i];
         }
+        if( minval > sig[i] ){
+            minval = sig[i];
+        }
     }
+
+    a_rcond = minval/maxval;
 
     for(int i=0; i < k; i++){
         if( sig[i] > rcond*maxval ) {
