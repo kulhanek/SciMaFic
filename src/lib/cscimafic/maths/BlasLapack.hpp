@@ -1,7 +1,7 @@
 #ifndef BlasLapackHPP
 #define BlasLapackHPP
 
-#ifdef DHAVE_MKL_ILP64
+#ifdef HAVE_MKL_ILP64
 // 64-bit integer - ILP64
 typedef long int BL_INT;
 #else
