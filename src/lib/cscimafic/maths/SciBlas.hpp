@@ -34,6 +34,9 @@ public:
 
     /// matrix vector multiplication
     static void gemv(double alpha,CFortranMatrix& a,CVector& x,double beta,CVector& y);
+
+    /// matrix matrix multiplication
+    static void gemm(double alpha,CFortranMatrix& a,CFortranMatrix& b,double beta,CFortranMatrix& c);
 };
 
 //------------------------------------------------------------------------------

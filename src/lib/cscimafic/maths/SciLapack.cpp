@@ -158,7 +158,7 @@ int CSciLapack::solvle(CFortranMatrix& a,CVector& rhs)
 
 //------------------------------------------------------------------------------
 
-int CSciLapack::gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank)
+int CSciLapack::gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank,double& a_rcond)
 {
     BL_INT m = a.GetNumberOfRows();
     BL_INT n = a.GetNumberOfColumns();
@@ -212,6 +212,9 @@ int CSciLapack::gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank)
     // run svd
     dgelsd_(&m,&n,&nrhs,a.GetRawDataField(),&lda,rhs.GetRawDataField(),&ldb,s.GetRawDataField(),
             &rcond,&lrank,work.GetRawDataField(),&lwork,iwork.GetRawDataField(),&info);
+
+    // real rcond
+    a_rcond = s[ns-1]/s[0];
 
     rank = lrank;
 

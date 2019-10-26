@@ -58,6 +58,26 @@ void CSciBlas::gemv(double alpha,CFortranMatrix& a,CVector& x,double beta,CVecto
     dgemv_(&trans,&m,&n,&alpha,a.GetRawDataField(),&m,x.GetRawDataField(),&inc,&beta,y.GetRawDataField(),&inc);
 }
 
+//------------------------------------------------------------------------------
+
+//extern "C" void dgemm_(char* transa, char* transb,BL_INT* M,BL_INT* N,BL_INT* K,double* alpha,
+//                       double* a,BL_INT* lda,double* b,BL_INT* ldb,double* beta,double* c, BL_INT* ldc);
+
+void CSciBlas::gemm(double alpha,CFortranMatrix& a,CFortranMatrix& b,double beta,CFortranMatrix& c)
+{
+    char transa = 'N';
+    char transb = 'N';
+    BL_INT m = a.GetNumberOfRows();
+    BL_INT n = b.GetNumberOfColumns();
+    BL_INT k = a.GetNumberOfColumns();
+
+    if( a.GetNumberOfColumns() != b.GetNumberOfRows() ){
+        RUNTIME_ERROR("matrix - matrix inconsistency");
+    }
+
+    dgemm_(&transa,&transb,&m,&n,&k,&alpha,a.GetRawDataField(),&m,b.GetRawDataField(),&k,&beta,c.GetRawDataField(),&m);
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================

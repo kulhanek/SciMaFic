@@ -48,7 +48,7 @@ public:
     static int solvle(CFortranMatrix& a,CVector& rhs);
 
     /// solve least square problem - SVD
-    static int gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank);
+    static int gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank,double& a_rcond);
 
     /// solve least square problem - QR
     static int gels(CFortranMatrix& a,CVector& rhs);
