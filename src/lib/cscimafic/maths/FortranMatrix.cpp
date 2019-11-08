@@ -50,8 +50,16 @@ CFortranMatrix::~CFortranMatrix(void)
 
 CFortranMatrix::CFortranMatrix(const CFortranMatrix& src)
 {
+    // initialization
+    NRows = 0;
+    NColumns = 0;
+    Array = NULL;
+
+    // allocate data
     CreateMatrix(src.GetNumberOfRows(),src.GetNumberOfColumns());
-    if( Array != NULL ) memcpy(Array,src.Array,NRows*NColumns*sizeof(double));
+
+    // copy data if any
+    if( NRows*NColumns > 0 ) memcpy(Array,src.Array,NRows*NColumns*sizeof(double));
 }
 
 //==============================================================================

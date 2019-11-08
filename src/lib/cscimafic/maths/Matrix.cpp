@@ -112,11 +112,11 @@ long unsigned int CMatrix::GetNumberOfColumns(void)
 
 void CMatrix::SetZero(void)
 {
-//    for(long unsigned int i=0; i<Rows; i++) {
-//        for(long unsigned int j=0; j<Columns; j++) {
-//            RowVectors[i][j] = 0.0;
-//        }
-//    }
+    for(long unsigned int i=0; i<Rows; i++) {
+        for(long unsigned int j=0; j<Columns; j++) {
+            RowVectors[i][j] = 0.0;
+        }
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -127,15 +127,15 @@ void CMatrix::SetUnit(void)
         RUNTIME_ERROR("Rows != Columns");
     }
 
-//    for(long unsigned int i=0; i<Rows; i++) {
-//        for(long unsigned int j=0; j<Columns; j++) {
-//            if( i == j ){
-//                RowVectors[i][j] = 1.0;
-//            } else {
-//                RowVectors[i][j] = 0.0;
-//            }
-//        }
-//    }
+    for(long unsigned int i=0; i<Rows; i++) {
+        for(long unsigned int j=0; j<Columns; j++) {
+            if( i == j ){
+                RowVectors[i][j] = 1.0;
+            } else {
+                RowVectors[i][j] = 0.0;
+            }
+        }
+    }
 }
 
 //------------------------------------------------------------------------------
