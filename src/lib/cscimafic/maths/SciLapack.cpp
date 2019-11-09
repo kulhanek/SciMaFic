@@ -67,6 +67,24 @@ void CSciLapack::SetNumThreadsLocal(int nthrs)
 #endif
 }
 
+//------------------------------------------------------------------------------
+
+int CSciLapack::GetNumThreads(void)
+{
+#ifdef HAVE_MKL
+#ifdef HAVE_MKL_PARALLEL
+    {
+        int ncpus = mkl_get_max_threads();
+        return(ncpus);
+    }
+#else
+        return(1);
+#endif
+#else
+        return(1);
+#endif
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================

@@ -33,8 +33,11 @@ public:
     /// print info about Blas/Lapack
     static void PrintExecInfo(CVerboseStr& vout);
 
-    /// set number of threads for Lapak/Blas
+    /// set number of threads for Lapack/Blas
     static void SetNumThreadsLocal(int nthrs);
+
+    /// get number of threads available for Lapack/Blas
+    static int GetNumThreads(void);
 
     ///  computes all eigenvalues and, optionally, eigenvectors of a real symmetric matrix A
     //  eigenvectors are stored columnwise
