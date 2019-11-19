@@ -45,6 +45,7 @@ extern "C" void dgesdd_(char* jobz,BL_INT* m,BL_INT* n,double* a,BL_INT* lda,dou
 // Cholesky factorization
 extern "C" void dpotrf_(char* uplo,BL_INT* n,double* a,BL_INT* lda,BL_INT* info);
 extern "C" void dpotri_(char* uplo,BL_INT* n,double* a,BL_INT* lda,BL_INT* info);
+extern "C" void dpotrs_(char* uplo,BL_INT* n,BL_INT* nrhs,double* a,BL_INT* lda,double* b,BL_INT* ldb,BL_INT* info);
 
 //------------------------------------------------------------------------------
 

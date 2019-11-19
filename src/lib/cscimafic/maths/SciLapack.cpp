@@ -134,7 +134,7 @@ int CSciLapack::syev(char jobz,char uplo,CFortranMatrix& a,CVector& w)
 
 //------------------------------------------------------------------------------
 
-int CSciLapack::solvle(CFortranMatrix& a,CVector& rhs)
+int CSciLapack::solvleLU(CFortranMatrix& a, CVector& rhs)
 {
     BL_INT info = 0;
     BL_INT ndimm = a.GetNumberOfRows();
@@ -171,6 +171,282 @@ int CSciLapack::solvle(CFortranMatrix& a,CVector& rhs)
     }
 
     delete[] indx;
+    return(info);
+}
+
+//------------------------------------------------------------------------------
+
+int CSciLapack::solvleLU(CFortranMatrix& a, CVector& rhs,double& logdet)
+{
+    BL_INT info = 0;
+    BL_INT ndimm = a.GetNumberOfRows();
+
+    logdet = 0.0;
+
+    if( ndimm == 0 ){
+        ES_ERROR("no rows in rhs");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != a.GetNumberOfColumns() ){
+        ES_ERROR("matrix A must be a square matrix");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != rhs.GetLength() ){
+        ES_ERROR("rhs is not compatible with A");
+        return(-1);
+    }
+
+    BL_INT* indx = new BL_INT[ndimm];
+
+    dgetrf_(&ndimm,&ndimm,a.GetRawDataField(),&ndimm,indx,&info);
+    if( info != 0 ){
+        delete[] indx;
+        ES_ERROR("unable to do LU decomposition");
+        return(info);
+    }
+
+    // calculate log determinat of A
+    for(BL_INT i=0; i < ndimm; i++){
+        logdet += log(fabs(a[i][i]));
+    }
+
+    char trans = 'N';
+    BL_INT  nrshs = 1;
+    dgetrs_(&trans,&ndimm,&nrshs,a.GetRawDataField(),&ndimm,indx,rhs.GetRawDataField(),&ndimm,&info);
+    if( info != 0 ){
+        delete[] indx;
+        ES_ERROR("unable to solve system of linear equations");
+        return(info);
+    }
+
+    delete[] indx;
+    return(info);
+}
+
+//------------------------------------------------------------------------------
+
+int CSciLapack::solvleLUInv(CFortranMatrix& a, CVector& rhs,double& logdet)
+{
+    BL_INT info = 0;
+    BL_INT ndimm = a.GetNumberOfRows();
+
+    logdet = 0.0;
+
+    if( ndimm == 0 ){
+        ES_ERROR("no rows in rhs");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != a.GetNumberOfColumns() ){
+        ES_ERROR("matrix A must be a square matrix");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != rhs.GetLength() ){
+        ES_ERROR("rhs is not compatible with A");
+        return(-1);
+    }
+
+    BL_INT* indx = new BL_INT[ndimm];
+
+    dgetrf_(&ndimm,&ndimm,a.GetRawDataField(),&ndimm,indx,&info);
+    if( info != 0 ){
+        delete[] indx;
+        ES_ERROR("unable to do LU decomposition");
+        return(info);
+    }
+
+    // calculate log determinat of A
+    for(BL_INT i=0; i < ndimm; i++){
+        logdet += log(fabs(a[i][i]));
+    }
+
+    char trans = 'N';
+    BL_INT  nrshs = 1;
+    dgetrs_(&trans,&ndimm,&nrshs,a.GetRawDataField(),&ndimm,indx,rhs.GetRawDataField(),&ndimm,&info);
+    if( info != 0 ){
+        delete[] indx;
+        ES_ERROR("unable to solve system of linear equations");
+        return(info);
+    }
+
+    // query work size
+    BL_INT     lwork = -1;
+    double  twork[1];
+
+    dgetri_(&ndimm,a.GetRawDataField(),&ndimm,indx,twork,&lwork,&info);
+
+    if( info != 0 ){
+        delete[] indx;
+        CSmallString error;
+        error << "unable to determine lwork, info = " << info;
+        INVALID_ARGUMENT(error);
+        return(info);
+    }
+
+    lwork = static_cast<BL_INT>(twork[0]) + 1;
+    if( lwork < 0 ){
+        delete[] indx;
+        stringstream error;
+        error << "memory request overflow, twork = " << twork[0] << " -> lwork = " << lwork;
+        RUNTIME_ERROR(error.str());
+    }
+
+    // printf("lwork = %d\n",lwork);
+
+    CSimpleVector<double>  work;
+    work.CreateVector(lwork);
+
+    // run
+    dgetri_(&ndimm,a.GetRawDataField(),&ndimm,indx,work,&lwork,&info);
+
+    if( info != 0 ){
+        delete[] indx;
+        CSmallString error;
+        error << "unable to invert the matrix, info = " << info;
+        INVALID_ARGUMENT(error);
+        return(info);
+    }
+
+    delete[] indx;
+    return(info);
+}
+
+//------------------------------------------------------------------------------
+
+int CSciLapack::solvleLL(CFortranMatrix& a, CVector& rhs)
+{
+    BL_INT info = 0;
+    BL_INT ndimm = a.GetNumberOfRows();
+
+    if( ndimm == 0 ){
+        ES_ERROR("no rows in rhs");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != a.GetNumberOfColumns() ){
+        ES_ERROR("matrix A must be a square matrix");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != rhs.GetLength() ){
+        ES_ERROR("rhs is not compatible with A");
+        return(-1);
+    }
+
+    char uplo = 'L';
+    dpotrf_(&uplo,&ndimm,a.GetRawDataField(),&ndimm,&info);
+    if( info != 0 ){
+        ES_ERROR("unable to do LL decomposition");
+        return(info);
+    }
+
+    BL_INT  nrshs = 1;
+    dpotrs_(&uplo,&ndimm,&nrshs,a.GetRawDataField(),&ndimm,rhs.GetRawDataField(),&ndimm,&info);
+    if( info != 0 ){
+        ES_ERROR("unable to solve linear equations");
+        return(info);
+    }
+
+    return(info);
+}
+
+//------------------------------------------------------------------------------
+
+int CSciLapack::solvleLL(CFortranMatrix& a, CVector& rhs,double& logdet)
+{
+    BL_INT info = 0;
+    BL_INT ndimm = a.GetNumberOfRows();
+
+    logdet = 0.0;
+
+    if( ndimm == 0 ){
+        ES_ERROR("no rows in rhs");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != a.GetNumberOfColumns() ){
+        ES_ERROR("matrix A must be a square matrix");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != rhs.GetLength() ){
+        ES_ERROR("rhs is not compatible with A");
+        return(-1);
+    }
+
+    char uplo = 'L';
+    dpotrf_(&uplo,&ndimm,a.GetRawDataField(),&ndimm,&info);
+    if( info != 0 ){
+        ES_ERROR("unable to do LL decomposition");
+        return(info);
+    }
+
+    // calculate log determinat of A
+    for(BL_INT i=0; i < ndimm; i++){
+        logdet += 2.0*log(fabs(a[i][i]));
+    }
+
+    BL_INT  nrshs = 1;
+    dpotrs_(&uplo,&ndimm,&nrshs,a.GetRawDataField(),&ndimm,rhs.GetRawDataField(),&ndimm,&info);
+    if( info != 0 ){
+        ES_ERROR("unable to solve linear equations");
+        return(info);
+    }
+
+    return(info);
+}
+
+//------------------------------------------------------------------------------
+
+int CSciLapack::solvleLLInv(CFortranMatrix& a, CVector& rhs,double& logdet)
+{
+    BL_INT info = 0;
+    BL_INT ndimm = a.GetNumberOfRows();
+
+    logdet = 0.0;
+
+    if( ndimm == 0 ){
+        ES_ERROR("no rows in rhs");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != a.GetNumberOfColumns() ){
+        ES_ERROR("matrix A must be a square matrix");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != rhs.GetLength() ){
+        ES_ERROR("rhs is not compatible with A");
+        return(-1);
+    }
+
+    char uplo = 'L';
+    dpotrf_(&uplo,&ndimm,a.GetRawDataField(),&ndimm,&info);
+    if( info != 0 ){
+        ES_ERROR("unable to do LL decomposition");
+        return(info);
+    }
+
+    // calculate log determinat of A
+    for(BL_INT i=0; i < ndimm; i++){
+        logdet += 2.0*log(fabs(a[i][i]));
+    }
+
+    BL_INT  nrshs = 1;
+    dpotrs_(&uplo,&ndimm,&nrshs,a.GetRawDataField(),&ndimm,rhs.GetRawDataField(),&ndimm,&info);
+    if( info != 0 ){
+        ES_ERROR("unable to solve linear equations");
+        return(info);
+    }
+
+    dpotri_(&uplo,&ndimm,a.GetRawDataField(),&ndimm,&info);
+    if( info != 0 ){
+        CSmallString error;
+        error << "unable to invert the matrix, info = " << info;
+        INVALID_ARGUMENT(error);
+        return(info);
+    }
+
+    // reconstruct the upper part of matrix
+    for(BL_INT i=0; i < ndimm; i++){
+        for(BL_INT j=0; j < i; j++){
+            a[j][i] = a[i][j];
+        }
+    }
+
     return(info);
 }
 
@@ -332,6 +608,7 @@ int CSciLapack::invLU(CFortranMatrix& a,double& logdet)
 
     lwork = static_cast<BL_INT>(twork[0]) + 1;
     if( lwork < 0 ){
+        delete[] indx;
         stringstream error;
         error << "memory request overflow, twork = " << twork[0] << " -> lwork = " << lwork;
         RUNTIME_ERROR(error.str());

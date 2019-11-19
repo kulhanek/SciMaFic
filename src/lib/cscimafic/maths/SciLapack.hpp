@@ -48,7 +48,22 @@ public:
     static int syev(char jobz,char uplo,CFortranMatrix& a,CVector& w);
 
     /// solve system of linear equation by LU
-    static int solvle(CFortranMatrix& a,CVector& rhs);
+    static int solvleLU(CFortranMatrix& a,CVector& rhs);
+
+    /// solve system of linear equation by LU
+    static int solvleLU(CFortranMatrix& a,CVector& rhs,double& logdet);
+
+    /// solve system of linear equation by LU + inv
+    static int solvleLUInv(CFortranMatrix& a,CVector& rhs,double& logdet);
+
+    /// solve system of linear equation by LL (via Cholesky factorization)
+    static int solvleLL(CFortranMatrix& a,CVector& rhs);
+
+    /// solve system of linear equation by LL (via Cholesky factorization)
+    static int solvleLL(CFortranMatrix& a,CVector& rhs,double& logdet);
+
+    /// solve system of linear equation by LL (via Cholesky factorization) + inv
+    static int solvleLLInv(CFortranMatrix& a,CVector& rhs,double& logdet);
 
     /// solve least square problem - SVD
     static int gelsd(CFortranMatrix& a,CVector& rhs,double rcond,int& rank,double& a_rcond);
