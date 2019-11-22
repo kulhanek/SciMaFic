@@ -30,13 +30,20 @@
 class SCIMAFIC_PACKAGE CSciBlas {
 public:
     /// dot product
+    /// ret = dot(a,b)
     static double dot(CVector& a,CVector& b);
 
     /// matrix vector multiplication
+    /// y = alpha*A*x + beta*y
     static void gemv(double alpha,CFortranMatrix& a,CVector& x,double beta,CVector& y);
 
     /// matrix matrix multiplication
+    /// C = alpha*A*B + beta*C;
     static void gemm(double alpha,CFortranMatrix& a,CFortranMatrix& b,double beta,CFortranMatrix& c);
+
+    /// matrix matrix multiplication
+    /// C = alpha*op(A)*op(B) + beta*C;
+    static void gemm(double alpha,char transa, CFortranMatrix& a,char transb,CFortranMatrix& b,double beta,CFortranMatrix& c);
 };
 
 //------------------------------------------------------------------------------

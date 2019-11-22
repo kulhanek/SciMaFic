@@ -67,15 +67,44 @@ void CSciBlas::gemm(double alpha,CFortranMatrix& a,CFortranMatrix& b,double beta
 {
     char transa = 'N';
     char transb = 'N';
-    BL_INT m = a.GetNumberOfRows();
-    BL_INT n = b.GetNumberOfColumns();
-    BL_INT k = a.GetNumberOfColumns();
 
-    if( a.GetNumberOfColumns() != b.GetNumberOfRows() ){
-        RUNTIME_ERROR("matrix - matrix inconsistency");
+    BL_INT m = c.GetNumberOfRows();
+    BL_INT n = c.GetNumberOfColumns();
+
+    BL_INT k;
+
+    if( transa == 'N' ){
+        k = a.GetNumberOfColumns();
+    } else {
+        k = a.GetNumberOfRows();
     }
 
-    dgemm_(&transa,&transb,&m,&n,&k,&alpha,a.GetRawDataField(),&m,b.GetRawDataField(),&k,&beta,c.GetRawDataField(),&m);
+    BL_INT lda = a.GetNumberOfRows();
+    BL_INT ldb = b.GetNumberOfRows();
+    BL_INT ldc = c.GetNumberOfRows();
+
+    dgemm_(&transa,&transb,&m,&n,&k,&alpha,a.GetRawDataField(),&lda,b.GetRawDataField(),&ldb,&beta,c.GetRawDataField(),&ldc);
+}
+
+//------------------------------------------------------------------------------
+
+void CSciBlas::gemm(double alpha,char transa, CFortranMatrix& a,char transb,CFortranMatrix& b,double beta,CFortranMatrix& c)
+{
+    BL_INT m = c.GetNumberOfRows();
+    BL_INT n = c.GetNumberOfColumns();
+    BL_INT k;
+
+    if( transa == 'N' ){
+        k = a.GetNumberOfColumns();
+    } else {
+        k = a.GetNumberOfRows();
+    }
+
+    BL_INT lda = a.GetNumberOfRows();
+    BL_INT ldb = b.GetNumberOfRows();
+    BL_INT ldc = c.GetNumberOfRows();
+
+    dgemm_(&transa,&transb,&m,&n,&k,&alpha,a.GetRawDataField(),&lda,b.GetRawDataField(),&ldb,&beta,c.GetRawDataField(),&ldc);
 }
 
 //==============================================================================

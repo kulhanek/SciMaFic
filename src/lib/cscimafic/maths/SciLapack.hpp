@@ -51,6 +51,9 @@ public:
     static int solvleLU(CFortranMatrix& a,CVector& rhs);
 
     /// solve system of linear equation by LU
+    static int solvleLU(CFortranMatrix& a,CFortranMatrix& rhs);
+
+    /// solve system of linear equation by LU
     static int solvleLU(CFortranMatrix& a,CVector& rhs,double& logdet);
 
     /// solve system of linear equation by LU + inv
@@ -58,6 +61,9 @@ public:
 
     /// solve system of linear equation by LL (via Cholesky factorization)
     static int solvleLL(CFortranMatrix& a,CVector& rhs);
+
+    /// solve system of linear equation by LL (via Cholesky factorization)
+    static int solvleLL(CFortranMatrix& a,CFortranMatrix& rhs);
 
     /// solve system of linear equation by LL (via Cholesky factorization)
     static int solvleLL(CFortranMatrix& a,CVector& rhs,double& logdet);

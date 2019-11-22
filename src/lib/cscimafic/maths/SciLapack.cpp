@@ -176,6 +176,48 @@ int CSciLapack::solvleLU(CFortranMatrix& a, CVector& rhs)
 
 //------------------------------------------------------------------------------
 
+int CSciLapack::solvleLU(CFortranMatrix& a, CFortranMatrix& rhs)
+{
+    BL_INT info = 0;
+    BL_INT ndimm = a.GetNumberOfRows();
+
+    if( ndimm == 0 ){
+        ES_ERROR("no rows in rhs");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != a.GetNumberOfColumns() ){
+        ES_ERROR("matrix A must be a square matrix");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != rhs.GetNumberOfRows() ){
+        ES_ERROR("rhs is not compatible with A");
+        return(-1);
+    }
+
+    BL_INT* indx = new BL_INT[ndimm];
+
+    dgetrf_(&ndimm,&ndimm,a.GetRawDataField(),&ndimm,indx,&info);
+    if( info != 0 ){
+        delete[] indx;
+        ES_ERROR("unable to do LU decomposition");
+        return(info);
+    }
+
+    char trans = 'N';
+    BL_INT  nrshs = rhs.GetNumberOfColumns();
+    dgetrs_(&trans,&ndimm,&nrshs,a.GetRawDataField(),&ndimm,indx,rhs.GetRawDataField(),&ndimm,&info);
+    if( info != 0 ){
+        delete[] indx;
+        ES_ERROR("unable to solve system of linear equations");
+        return(info);
+    }
+
+    delete[] indx;
+    return(info);
+}
+
+//------------------------------------------------------------------------------
+
 int CSciLapack::solvleLU(CFortranMatrix& a, CVector& rhs,double& logdet)
 {
     BL_INT info = 0;
@@ -338,6 +380,43 @@ int CSciLapack::solvleLL(CFortranMatrix& a, CVector& rhs)
     }
 
     BL_INT  nrshs = 1;
+    dpotrs_(&uplo,&ndimm,&nrshs,a.GetRawDataField(),&ndimm,rhs.GetRawDataField(),&ndimm,&info);
+    if( info != 0 ){
+        ES_ERROR("unable to solve linear equations");
+        return(info);
+    }
+
+    return(info);
+}
+
+//------------------------------------------------------------------------------
+
+int CSciLapack::solvleLL(CFortranMatrix& a,CFortranMatrix& rhs)
+{
+    BL_INT info = 0;
+    BL_INT ndimm = a.GetNumberOfRows();
+
+    if( ndimm == 0 ){
+        ES_ERROR("no rows in rhs");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != a.GetNumberOfColumns() ){
+        ES_ERROR("matrix A must be a square matrix");
+        return(-1);
+    }
+    if( a.GetNumberOfRows() != rhs.GetNumberOfRows() ){
+        ES_ERROR("rhs is not compatible with A");
+        return(-1);
+    }
+
+    char uplo = 'L';
+    dpotrf_(&uplo,&ndimm,a.GetRawDataField(),&ndimm,&info);
+    if( info != 0 ){
+        ES_ERROR("unable to do LL decomposition");
+        return(info);
+    }
+
+    BL_INT  nrshs = rhs.GetNumberOfColumns();
     dpotrs_(&uplo,&ndimm,&nrshs,a.GetRawDataField(),&ndimm,rhs.GetRawDataField(),&ndimm,&info);
     if( info != 0 ){
         ES_ERROR("unable to solve linear equations");
