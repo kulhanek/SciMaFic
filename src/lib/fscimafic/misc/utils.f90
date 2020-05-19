@@ -64,8 +64,14 @@ real(SMFDP) function rtime()
  implicit none
  ! -----------------------------------------------------------------------------
 
- call cpu_time(rtime)
- return
+ INTEGER :: count, count_rate, count_max
+ CALL SYSTEM_CLOCK(count, count_rate, count_max)
+ rtime = real(count,SMFDP) / real(count_rate,SMFDP)
+
+ ! this return all CPU time - misleading for OpenMP apps
+ ! call cpu_time(rtime)
+ 
+return
 
 end function rtime
 
