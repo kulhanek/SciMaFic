@@ -27,7 +27,7 @@ implicit none
 
 integer,parameter       :: SMFDP                = 8     ! double precision - real(8)
 integer,parameter       :: SMFSP                = 4     ! single precision - real(4)
-integer,parameter       :: SMF_MAX_TIMER_TITLE  = 30    ! maximum length of timer legend
+integer,parameter       :: SMF_MAX_TIMER_TITLE  = 50    ! maximum length of timer legend
 integer,parameter       :: SMF_MAX_TIMER_LINE   = 80    ! maximum length of line in write_timer
 integer,parameter       :: SMF_MAX_SYMBOL       = 2
 integer,parameter       :: SMF_MAX_XYZ_COMMENT  = 80
