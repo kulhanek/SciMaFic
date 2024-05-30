@@ -41,6 +41,20 @@ double CSciBlas::dot(CVector& a,CVector& b)
 
 //------------------------------------------------------------------------------
 
+double CSciBlas::dot(CVector& a,CVector& b,size_t start,size_t len)
+{
+    if( a.GetLength() != b.GetLength() ){
+        RUNTIME_ERROR("lengths of A and B are not the same");
+    }
+    BL_INT inc = 1;
+    double rv = 0.0;
+    BL_INT n = len;
+    rv = ddot_(&n,&(a.GetRawDataField()[start]),&inc,&(b.GetRawDataField()[start]),&inc);
+    return(rv);
+}
+
+//------------------------------------------------------------------------------
+
 void CSciBlas::gemv(double alpha,CFortranMatrix& a,CVector& x,double beta,CVector& y)
 {
     BL_INT inc = 1;

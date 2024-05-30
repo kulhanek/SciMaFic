@@ -32,6 +32,9 @@ public:
     /// dot product
     /// ret = dot(a,b)
     static double dot(CVector& a,CVector& b);
+    /// dot product
+    /// ret = dot(a,b)
+    static double dot(CVector& a,CVector& b,size_t start,size_t len);
 
     /// matrix vector multiplication
     /// y = alpha*A*x + beta*y
